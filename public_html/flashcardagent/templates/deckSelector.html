@@ -1,0 +1,11 @@
+<span>
+    <button data-dropdown="deck-drop" class="button dropdown secondary radius">
+        Deck Selector
+    </button>
+    <ul id="deck-drop" class="f-dropdown">
+        <li ng-repeat="deck in decks">
+            <a href="{{baseUrl}}/card/{{$index}}">{{deck.name}}
+            </a>
+        </li>
+    </ul>
+</span>

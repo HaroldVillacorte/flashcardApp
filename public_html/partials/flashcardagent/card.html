@@ -1,0 +1,49 @@
+<div id="app-header" class="row">
+    <div id="title-area" class="columns large-6">
+        <h3 id="deck-title">{{deck.name}}</h3>
+    </div>
+    <div id="top-controls" class="columns large-6">
+        <deck-selector class="right"></deck-selector>
+        <button id="card-drop-click" data-dropdown="card-drop" class="button dropdown secondary right radius" >
+            Card Selector
+        </button>
+        <ul id="card-drop" class="f-dropdown">
+            <li ng-repeat="card in deck.cards" ng-click="quickSelect($index)">
+                <a>{{card.question}}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div  id="card-box" class="columns large-12">
+        <p message ng-show="showMessage" class="alert-box {{messageClass}} radius">{{text}}</p>
+        <div id="card-box-content">
+            <button class="button tiny secondary radius right">
+                Mark it
+                <i class="foundicon-plus"></i>
+            </button>
+            <h6>{{qora + ' ' + (cardIndex + 1 + ' of ' + deck.cards.length) + ':'}}</h6>
+            <p>{{content}}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="bottom-controls" class="columns large-12">
+        <ul class="button-group radius left">
+            <li class="button success" ng-click="previousCard()">
+                <i class="foundicon-left-arrow"></i>
+                Prev
+            </li>
+            <li class="button success" ng-click="flip()">
+                <i class="foundicon-page"></i>
+                Flip
+            </li>
+            <li class="button success" ng-click="nextCard()">
+                Next
+                <i class="foundicon-right-arrow"></i>
+            </li>
+        </ul>
+    </div>
+</div>
