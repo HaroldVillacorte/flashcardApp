@@ -1,29 +1,121 @@
 /*******************************************************************************
+    HTML
+*******************************************************************************/
+
+html {
+}
+
+h1, h2, h3, h4, h5, h6 {
+}
+
+.auto-scroller-y {
+    overflow-y: auto;
+}
+
+.auto-scroller-x {
+    overflow-x: auto;
+}
+canvas {
+}
+
+textarea {
+    resize:vertical;
+}
+
+img {
+    margin-top: 1em;
+}
+
+/*******************************************************************************
+    FC-CLOSE: MESSAGE
+*******************************************************************************/
+
+.fc-close {
+    font-size: 1.375em;
+    padding: 5px 4px 4px;
+    line-height: 0;
+    position: absolute;
+    top: 0.4375em;
+    right: 0.3125em;
+    color: #333;
+    opacity: 0.3;
+}
+
+/*******************************************************************************
     BODY
 *******************************************************************************/
 
 body {
-    background-color: #262626;
-    color: whitesmoke;
 }
 
 /*******************************************************************************
-    APP-HEADER
+    TOP BAR
 *******************************************************************************/
 
-#app-header h1, #app-header h2, #app-header h3, #app-header h4,
-#app-header h5, #app-header h6 {
-    color: whitesmoke;
+.top-bar {
+    margin-bottom: 0;
 }
-#app-header .button {
+
+/*******************************************************************************
+    MAIN WRAPPER
+*******************************************************************************/
+
+#main-wrapper {
+    max-width: 100%;
+    padding-top: 1.875em;
+}
+
+/*******************************************************************************
+    CARD WRAPPER
+*******************************************************************************/
+
+.wrapper-100 {
+    margin-top: -1.875em;
+    padding-top: 1.875em;
+}
+
+/*******************************************************************************
+    TABLE-WRAPPER
+*******************************************************************************/
+
+.table-wrapper {
+}
+
+/*******************************************************************************
+    TOP-CONTROLS: TABLE
+*******************************************************************************/
+
+#top-controls .button {
     margin-left: 5px;
 }
 
 /*******************************************************************************
-    TOP-CONTROLS
+    SELECTOR-COLUMN: CARD
 *******************************************************************************/
+#selector-column h1, #selector-column h2, #selector-column h3, #selector-column h4,
+#selector-column h5, #selector-column h6 {
+}
+#selector-column {
+    margin-top: -1.875em;
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    background-color: whites;
+}
 
-#top-controls {
+#selector-column li.active a {
+    text-decoration: underline;
+}
+
+#deck-selector {
+    border-bottom: #d3d3d3 thick solid;
+    overflow-y: scroll;
+    padding: 5px;
+}
+
+#card-selector {
+    overflow-y: scroll;
+    padding: 5px;
 }
 
 /*******************************************************************************
@@ -31,7 +123,6 @@ body {
 *******************************************************************************/
 
 #quick-select {
-    background-color: whitesmoke;
     min-height: 310px;
 }
 
@@ -41,19 +132,23 @@ body {
 
 #card-box h1, #card-box h2, #card-box h3, #card-box h4,
 #card-box h5, #card-box h6 {
-    //color: whitesmoke;
 }
 
 #card-box-content {
-    background-color: white;
-    min-height: 200px;
     border-radius: 3px;
-    padding: 2em;
+    border: 2px solid whitesmoke;
+    padding: 1em 2em;
     margin-bottom: 1.5em;
+    min-height: 350px;
+    box-shadow: 5px 5px 3px #888888;
+}
+
+.striped-card {
+    background: url(../images/flashcard-bg.gif);
 }
 
 /*******************************************************************************
-    BOTTOM_CONTROLS
+    BOTTOM_CONTROLS: CARD
 *******************************************************************************/
 
 #bottom-controls {

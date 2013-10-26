@@ -1,0 +1,16 @@
+<div class="row">
+    <div class="columns large-8 large-offset-2">
+
+            <h4>Deck name: {{deck.name}}</h4>
+            <h4>Category: {{chosenCategory}}</h4>
+            <input name="deck-name"
+                   type="text"
+                   placeholder="Deck name"
+                   ng-model="deck.name"
+            />
+
+        <button class="success radius" ng-click="add()">Save</button>
+        <button class="secondary radius" ng-click="cancel()">Cancel</button>
+
+    </div>
+</div>

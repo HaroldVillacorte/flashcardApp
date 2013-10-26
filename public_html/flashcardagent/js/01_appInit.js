@@ -1,1 +1,1 @@
-var flashcardAgent = angular.module('flashcardAgent', []);
+var flashcardAgent = angular.module('flashcardAgent', ['ngSanitize', 'angularFileUpload']);

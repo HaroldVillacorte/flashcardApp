@@ -1,0 +1,144 @@
+<div class="row">
+
+    <div class="columns large-12 wrapper-100 auto-scroller-y" quickheight="100">
+        <div class="right">
+            <button class="success small radius"
+                    ng-click="save()"
+                    >
+                Save Card
+            </button>
+            <button class="secondary small radius"
+                    ng-click="cancel()"
+                    >
+                Cancel
+            </button>
+        </div>
+        <h4>Category: {{chosenCategory}} | Deck: {{chosenDeck}}</h4>
+        <message></message>
+        <div class="section-container auto" data-section>
+
+            <section class="active">
+                <p class="title" data-section-title><a href="#panel1">Question</a></p>
+                <div class="content add-card-wrapper" data-section-content>
+
+
+                    <div class="section-container auto" data-section>
+                        <section class="active">
+                            <p class="title"><a href="#section1-1">Question</a></p>
+                            <div class="content">
+                                <label for="question">
+                                    <textarea name="question"
+                                              placeholder="Question..."
+                                              ng-model="card.question"
+                                              />
+                                    </textarea>
+                                </label>
+                            </div>
+                        </section>
+                        <section>
+                            <p class="title"><a href="#section1-2">Edit image</a></p>
+                            <div class="content">
+                                <p>
+                                <image-drop canvas="question"></image-drop>
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div>
+                        <article class="panel sub-preview">
+                            <p class="large-6" ng-bind-html="card.question | newlines"></p>
+                            <p class="large-6">
+                                <canvas id="question-canvas" ng-show="showQuestionImageCanvas"></canvas>
+                                <img ng-src="{{questionImageAttachment}}" ng-show="showQuestionImageAttachment" />
+                            </p>
+                        </article>
+                    </div>
+
+                </div>
+            </section>
+
+            <section>
+                <p class="title" data-section-title><a href="#panel2">Answer</a></p>
+                <div class="content add-card-wrapper" data-section-content>
+
+
+                    <div class="section-container auto" data-section>
+                        <section class="active">
+                            <p class="title"><a href="#section2-1">Answer</a></p>
+                            <div class="content">
+                                <label for="answer">
+                                    <textarea name="answer"
+                                              placeholder="Answer..."
+                                              ng-model="card.answer"
+                                              />
+                                    </textarea>
+                                </label>
+                            </div>
+                        </section>
+                        <section>
+                            <p class="title"><a href="#section2-2">Edit image</a></p>
+                            <div class="content">
+                                <p>
+                                <image-drop canvas="answer"></image-drop>
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div>
+                        <article class="panel sub-preview">
+                            <p class="large-6 large-centered" ng-bind-html="card.answer | newlines"></p>
+                            <p class="large-6">
+                                <canvas id="answer-canvas" ng-show="showAnswerImageCanvas"></canvas>
+                                <img ng-src="{{answerImageAttachment}}" ng-show="showAnswerImageAttachment" />
+                            </p>
+                        </article>
+                    </div>
+
+                </div>
+            </section>
+
+            <section>
+                <p class="title" data-section-title><a href="#panel3">Notes</a></p>
+                <div class="content add-card-wrapper" data-section-content>
+
+
+                    <div class="section-container auto" data-section>
+                        <section class="active">
+                            <p class="title"><a href="#section3-1">Notes</a></p>
+                            <div class="content">
+                                <label for="notes">
+                                    <textarea name="notes"
+                                              placeholder="Notes..."
+                                              ng-model="card.notes"
+                                              />
+                                    </textarea>
+                                </label>
+                            </div>
+                        </section>
+                        <section>
+                            <p class="title"><a href="#section3-2">Edit image</a></p>
+                            <div class="content">
+                                <p>
+                                <image-drop canvas="notes"></image-drop>
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div>
+                        <article class="panel sub-preview">
+                            <p class="large-6" ng-bind-html="card.notes | newlines"></p>
+                            <p class="large-6">
+                                <canvas id="notes-canvas" ng-show="showNotesImageCanvas"></canvas>
+                                <img ng-src="{{notesImageAttachment}}" ng-show="showNotesImageAttachment"/>
+                            </p>
+                        </article>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

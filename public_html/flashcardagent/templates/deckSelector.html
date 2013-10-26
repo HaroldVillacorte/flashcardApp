@@ -4,7 +4,8 @@
     </button>
     <ul id="deck-drop" class="f-dropdown">
         <li ng-repeat="deck in decks">
-            <a href="{{baseUrl}}/card/{{$index}}">{{deck.name}}
+            <a ng-click="goToDeck($index)">
+                {{deck.name}}
             </a>
         </li>
     </ul>

@@ -1,0 +1,59 @@
+<div class="row">
+    <div class="columns large-8 large-offset-2">
+        <message></message>
+
+        <h2>Synchronize</h2>
+        <h4>Warning: all sync operations are irreversible.</h4>
+
+        <div ng-show="pleaseWait">
+            <h2>Please wait...</h2>
+            <h1><i class="foundicon-smiley"></i></h1>
+        </div>
+
+        <div ng-show="showHome">
+            <p>
+                Last sync was on: {{syncTime | date: 'MMM d, y h:mm:ss a' || 'You have not synced your device yet.'}}
+            </p>
+            <p>
+                Last device save was on: {{updateTime | date: 'MMM d, y h:mm:ss a' || 'You have not saved any data.'}}
+            </p>
+            <h6>Pushing will send your device data to the server and overwrite the server.</h6>
+            <button class="success large radius" ng-click="choosePush()">
+                <i class="foundicon-refresh"></i>
+                Push
+                <i class="foundicon-up-arrow"></i>
+            </button>
+            <h6>Pulling will request your data from the server and overwrite the device.</h6>
+            <button class="success large radius" ng-click="choosePull()">
+                <i class="foundicon-refresh"></i>
+                Pull
+                <i class="foundicon-down-arrow"></i>
+            </button>
+        </div>
+
+        <div ng-show="showPush">
+            <h6>Are you sure that the device you are using has the latest data?</h6>
+            <button class="success large radius" ng-click="push()">
+                <i class="foundicon-refresh"></i>
+                Yes, Push Now
+                <i class="foundicon-up-arrow"></i>
+            </button>
+            <button class="secondary large radius" ng-click="cancel()">
+                Cancel
+            </button>
+        </div>
+
+        <div ng-show="showPull">
+            <h6>Are you sure that the data on the server is more recent than the data on your device?</h6>
+            <button class="success large radius" ng-click="pull()">
+                <i class="foundicon-refresh"></i>
+                Yes, Pull Now
+                <i class="foundicon-down-arrow"></i>
+            </button>
+            <button class="secondary large radius" ng-click="cancel()">
+                Cancel
+            </button>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,16 @@
+{
+    "name": "Flashcard Agent",
+    "description": "The most advanced cross platform flashcard software available.",
+    "version": "0.1",
+    "app": {
+        "background": {
+            "scripts": [
+                "background.js"
+            ]
+        }
+    },
+    "icons": {"16": "logo-16.png", "128": "logo-128.png"},
+    "permissions": [
+        "fileSystem"
+    ]
+}

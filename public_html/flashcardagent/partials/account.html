@@ -1,0 +1,48 @@
+<div class="row">
+    <div class="columns large-8 large-offset-2">
+        <message></message>
+
+        <div ng-show="pleaseWait">
+            <h2>Please wait...</h2>
+            <h1><i class="foundicon-smiley"></i></h1>
+        </div>
+
+        <div ng-show="showAccount">
+            <h2>Account</h2>
+            <p>Username: {{username}}</p>
+            <p>Email: {{email}}</p>
+            <p>Login expires on: {{apiExpire * 1000 | date:'MMM d, y'}}</p>
+            <button class="radius" ng-click="logout()">Logout</button>
+        </div>
+
+        <div ng-show="showLogin">
+            <h2>Login</h2>
+            <label>Username:</label>
+            <input type="text" placeholder="Username" ng-model="username" />
+            <label>Password:</label>
+            <input type="password" placeholder="Password" ng-model="password" />
+            <button class="radius" ng-click="login()">Login</button>
+            <p>
+                Don't have an account?
+                &nbsp;
+                <button class="success small radius" ng-click="showSignUpForm()">
+                    Sign up
+                </button>
+            </p>
+
+        </div>
+
+        <div ng-show="showSignUp">
+            <h2>Sign Up</h2>
+            <label>Username:</label>
+            <input type="text" placeholder="Username" ng-model="newUsername" />
+            <label>Email:</label>
+            <input type="text" placeholder="Email" ng-model="newEmail" />
+            <label>Password:</label>
+            <input type="password" placeholder="Password" ng-model="newPassword" />
+            <button class="radius left" ng-click="signUp()">Submit</button>&nbsp;
+            <button class="radius secondary" ng-click="cancelSignUp()">Cancel</button>
+        </div>
+
+    </div>
+</div>

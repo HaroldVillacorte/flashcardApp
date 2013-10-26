@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="columns large-8 large-offset-2">
+
+        <label for="category-name">
+            <h4>Category name: {{category.name}}</h4>
+            <input name="category-name"
+                   type="text"
+                   placeholder="Category name"
+                   ng-model="category.name"
+            />
+        </label>
+
+        <button class="success radius" ng-click="add()">Save</button>
+        <button class="secondary radius" ng-click="cancel()">Cancel</button>
+
+    </div>
+</div>

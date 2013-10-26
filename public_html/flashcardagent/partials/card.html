@@ -1,0 +1,88 @@
+<div id="selector-column" class="columns large-3 hide-for-small wrapper-100" quickheight="100">
+    <div id="deck-selector" quickheight="35">
+        <select name="category-selector" ng-model="chosenCategory">
+            <option ng-repeat="category in categories" value="{{$index}}">
+                {{category.name}}
+            </option>
+        </select>
+        <strong>Deck</strong>
+        <ul class="side-nav">
+            <li ng-class="{active: $index == chosenDeck}" ng-repeat="deck in decks" ng-click="setDeck($index)">
+                <a >{{deck.name}}</a>
+            </li>
+        </ul>
+    </div>
+    <div id="card-selector" quickheight="65">
+        <strong>Card</strong>
+        <ul class="side-nav">
+            <li ng-show="deck && cards.length" ng-class="{active: $index == cardIndex}" ng-repeat="card in cards" ng-click="setCard($index)">
+                <a><span ng-bind-html="card.question"></span></a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="columns large-9 wrapper-100 auto-scroller-y" quickheight="100">
+    <div id="title-area" class="columns large-12 small-6">
+        <h3 ng-show="deck.name" id="deck-title">{{deck.name}}</h3>
+        <h3 ng-show="!decks.length && categories.length">Category has no decks.</h3>
+        <h3 ng-show="!categories.length">Category list is empty.</h3>
+    </div>
+    <div id="top-controls" class="columns large-6 show-for-small">
+        <deck-selector class="right"></deck-selector>
+        <button id="card-drop-click" data-dropdown="card-drop" class="button dropdown secondary right radius" >
+            Card Selector
+        </button>
+        <ul id="card-drop" class="f-dropdown">
+            <li ng-repeat="card in deck.cards" ng-click="quickSelect($index)">
+                <a>{{card.question}}</a>
+            </li>
+        </ul>
+    </div>
+
+    <div  id="card-box" class="columns large-12">
+        <message></message>
+        <div id="card-box-content"
+             class="columns large-10 large-centered {{stripedCard}}"
+             >
+            <button class="button tiny secondary radius right" ng-show="card.notes" ng-click="showNotes()">
+                Notes
+                <i class="foundicon-down-arrow"></i>
+            </button>
+            <h6 ng-show="deck && cards.length">{{qora + ' ' + ((cardIndex + 1) + ' of ' + cards.length) + ':'}}</h6>
+            <h6 ng-show="!cards.length">Deck is empty.</h6>
+            <p ng-show="deck && cards.length && show.question">
+                <span ng-bind-html="card.question"></span>
+                <br/>
+                <img ng-hide="!card.questionImage || !deck" ng-src="{{questionImageAttachment}}" class="large-8" />
+            </p>
+            <p ng-show="deck && cards.length && show.answer">
+                <span ng-bind-html="card.answer"></span>
+                <br/>
+                <img ng-hide="!card.answerImage || !deck" ng-src="{{answerImageAttachment}}" class="large-8" />
+            </p>
+            <p ng-show="deck && cards.length && show.notes">
+                <span ng-bind-html="card.notes"></span>
+                <br/>
+                <img ng-hide="!card.notesImage || !deck" ng-src="{{notesImageAttachment}}" class="large-8" />
+            </p>
+        </div>
+    </div>
+
+    <div id="bottom-controls" class="columns large-10 large-centered">
+        <ul class="button-group radius left" style="margin-bottom: 2em;">
+            <li class="button success" ng-click="previousCard()">
+                <i class="foundicon-left-arrow"></i>
+                Prev
+            </li>
+            <li class="button success" ng-click="flip()" ui-keypress="{13:'flip()'}">
+                <i class="foundicon-up-arrow"></i>
+                Flip
+            </li>
+            <li class="button success" ng-click="nextCard()">
+                Next
+                <i class="foundicon-right-arrow"></i>
+            </li>
+        </ul>
+    </div>
+</div>

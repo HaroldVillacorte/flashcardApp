@@ -1,0 +1,12 @@
+<div>
+    Allowed image type are jpg, jpeg, png, and gif.  200kb max to synchronize data with the server.
+    <form>
+        <input name="question-image"
+               type="file"
+               ng-file-select="dropImage($files)"
+               />
+        <input type="reset" class="secondary small" ng-click="removeImage()"
+               value="Remove"/>
+    </form>
+    <p>{{message}}</p>
+</div>

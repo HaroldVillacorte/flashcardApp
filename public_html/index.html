@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en"><![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
@@ -9,22 +9,37 @@
     <link rel="stylesheet" href="lib/foundation-4.3.1/css/foundation.min.css" />
     <link rel="stylesheet" href="lib/foundation-4.3.1/foundation_icons_general_enclosed/stylesheets/general_enclosed_foundicons.css" />
     <link rel="stylesheet" href="lib/foundation-4.3.1/foundation_icons_general_enclosed/stylesheets/general_enclosed_foundicons_ie7.css" />
+    <link rel="stylesheet" href="lib/foundation-4.3.1/zurb-responsive-tables-0d34bc6/responsive-tables.css" />
     <link rel="stylesheet" href="flashcardagent/css/app.css" />
     <script src="lib/foundation-4.3.1/js/vendor/custom.modernizr.js"></script>
 </head>
-<body ng-app="flashcardAgent">
+<body ng-app="flashcardAgent" ng-csp>
 
-    <nav class="top-bar" data-options="is_hover:false">
+    <nav ng-controller="NavController" class="top-bar" data-options="is_hover:false">
         <ul class="title-area">
             <li class="name">
-                <h1><a href="/">Flashcard Agent</a></h1>
+                <h1>
+                    <a>{{route.current.title || 'Flashcard Agent'}}</a>
+                </h1>
             </li>
-            <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+            <li id="toggle-top-bar" class="toggle-topbar menu-icon">
+                <a href="#"><span>Menu</span></a>
+            </li>
         </ul>
         <section class="top-bar-section">
-            <ul class="right" ng-controller="NavController">
+            <ul class="left">
+                <li ng-show="showRefresh">
+                    <a ng-click="refresh()" title="refresh"><i class="foundicon-refresh"></i></a>
+                </li>
+                <li ng-show="showPleaseWait">
+                    <a>Please wait...</a>
+                </li>
+            </ul>
+        </section>
+        <section class="top-bar-section">
+            <ul class="right" >
                 <li ng-repeat="link in mainMenu">
-                    <a href="{{baseUrl + link.url}}">
+                    <a ng-click="goTo($index)">
                         <i class="foundicon-{{link.icon}}"> {{link.title}}</i>
                     </a>
                 </li>
@@ -32,23 +47,38 @@
         </section>
     </nav>
 
-    <view ng-view id="ng-view"></view>
+    <div id="main-wrapper">
+        <view ng-view id="ng-view"></view>
+    </div>
 
-    <script>
-        document.write('<script src=' +
-              ('__proto__' in {} ? 'lib/foundation-4.3.1/js/vendor/zepto' : 'lib/foundation-4.3.1/js/vendor/jquery') +
-              '.js><\/script>');
-    </script>
+    <!-- Libraries -->
+    <script src="lib/jquery/jquery-1.10.2.min.js"></script>
     <script src="lib/foundation-4.3.1/js/foundation.min.js"></script>
-    <script>
-        $(document).foundation();
-    </script>
-    <script src="lib/angular/angular.min.js"></script>
+    <script src="lib/pouchdb/pouchdb-nightly.min.js"></script>
+    <script src="lib/angular/angular.1.0.8.min.js"></script>
+
+    <!-- Angular modules -->
+    <script src="angular-modules/angular-sanitize.js"></script>
+    <script src="angular-modules/angular-file-upload.js"></script>
+
+    <!-- Initialize app -->
     <script src="flashcardagent/js/01_appInit.js"></script>
-    <script src="flashcardagent/js/02_routes.js"></script>
+
+    <!-- Services -->
+    <script src="flashcardagent/js/services/file-service.js"></script>
     <script src="flashcardagent/js/03_services.js"></script>
+
+    <!-- Directives -->
     <script src="flashcardagent/js/04_directive.js"></script>
-    <script src="flashcardagent/js/05_controller.js"></script>
-    <script src="flashcardagent/js/06_config.js"></script>
+
+    <!-- Filters -->
+    <script src="flashcardagent/js/05_filter.js"></script>
+    <script src="flashcardagent/js/06_controller.js"></script>
+
+    <!-- Configuration -->
+    <script src="flashcardagent/js/07_config.js"></script>
+
+    <!-- DOM -->
+    <script src="flashcardagent/js/domstuff.js"></script>
 </body>
 </html>
