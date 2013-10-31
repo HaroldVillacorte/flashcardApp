@@ -1,6 +1,7 @@
 <div class="row">
 
     <div class="columns large-12 wrapper-100 auto-scroller-y" quickheight="100">
+        <message></message>
         <div class="right">
             <button class="success small radius"
                     ng-click="save()"
@@ -13,8 +14,7 @@
                 Cancel
             </button>
         </div>
-        <h4>Category: {{chosenCategory}} | Deck: {{chosenDeck}}</h4>
-        <message></message>
+        <div>&nbsp;<!-- foundation 4 bug workaround --></div>
         <div class="section-container auto" data-section>
 
             <section class="active">

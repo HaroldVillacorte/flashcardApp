@@ -1,14 +1,9 @@
 <div id="selector-column" class="columns large-3 hide-for-small wrapper-100" quickheight="100">
     <div id="deck-selector" quickheight="35">
-        <select name="category-selector" ng-model="chosenCategory">
-            <option ng-repeat="category in categories" value="{{$index}}">
-                {{category.name}}
-            </option>
-        </select>
         <strong>Deck</strong>
         <ul class="side-nav">
             <li ng-class="{active: $index == chosenDeck}" ng-repeat="deck in decks" ng-click="setDeck($index)">
-                <a >{{deck.name}}</a>
+                <a >{{deck.doc.name}}</a>
             </li>
         </ul>
     </div>
@@ -23,10 +18,9 @@
 </div>
 
 <div class="columns large-9 wrapper-100 auto-scroller-y" quickheight="100">
+     <message></message>
     <div id="title-area" class="columns large-12 small-6">
-        <h3 ng-show="deck.name" id="deck-title">{{deck.name}}</h3>
-        <h3 ng-show="!decks.length && categories.length">Category has no decks.</h3>
-        <h3 ng-show="!categories.length">Category list is empty.</h3>
+        <h3 id="deck-title">{{deck.doc.name || 'You have not saved any decks.'}}</h3>
     </div>
     <div id="top-controls" class="columns large-6 show-for-small">
         <deck-selector class="right"></deck-selector>
@@ -41,7 +35,6 @@
     </div>
 
     <div  id="card-box" class="columns large-12">
-        <message></message>
         <div id="card-box-content"
              class="columns large-10 large-centered {{stripedCard}}"
              >

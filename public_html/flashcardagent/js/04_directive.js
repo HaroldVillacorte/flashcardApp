@@ -2,17 +2,16 @@ flashcardAgent.directive('message', function(Message) {
     return {
         restrict: 'EA',
         templateUrl: '/flashcardagent/templates/message.html',
+        scope: {},
         link: function(scope, element, attrs) {
-            scope.$on('message', function() {
-                scope.$apply(function() {
-                    scope.text = Message.text;
-                    scope.showMessage = Message.show;
-                    scope.messageClass = Message.class;
-                });
-            });
             scope.close = function() {
                 Message.reset();
             };
+            scope.$on('message', function() {
+                scope.text = Message.text;
+                scope.showMessage = Message.show;
+                scope.messageClass = Message.class;
+            });
             scope.$on('$locationChangeStart', function() {
                 Message.reset();
             });
@@ -96,10 +95,9 @@ flashcardAgent.directive('imageDrop', function(fileService) {
                     }
                     canvas.width = this.width;
                     canvas.height = this.height;
-                    //canvas.style.width = '100%';
+                    canvas.style.width = this.width + 'px';
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     dataUrl = canvas.toDataURL();
-                    //console.log(dataUrl.replace(/^data:image\/(png|jpg);base64,/, ""));
                     base64String = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
                     scope.$parent.addImage({
                         canvas: attrs.canvas,

@@ -3,114 +3,52 @@ flashcardAgent.config(function($routeProvider, $httpProvider) {
         controller: 'IndexController',
         templateUrl: 'flashcardagent/partials/index.html',
         title: 'Flashcard Agent',
-        icon: 'smiley',
-        resolve: {
-            loadIndexData: IndexController.loadIndexData
-        }
+        icon: 'smiley'
     }).when('/data-view', {
         controller: 'DataViewController',
         templateUrl: 'flashcardagent/partials/data-view.html',
-        title: 'Manage Categories',
-        icon: 'folder',
-        resolve: {
-            loadDataViewData: DataViewController.loadDataViewData
-        }
-    }).when('/category-add', {
-        controller: 'CategoryAddController',
-        templateUrl: 'flashcardagent/partials/category-add.html',
-        title: 'Add a Category',
-        icon: 'plus',
-        resolve: {
-            loadCategoryAddData: CategoryAddController.loadCategoryAddData
-        }
-    }).when('/category-edit/:categoryName', {
-        controller: 'CategoryEditController',
-        templateUrl: 'flashcardagent/partials/category-edit.html',
-        title: 'Edit a Category',
-        icon: 'edit',
-        resolve: {
-           loadCategoryEditData: CategoryEditController.loadCategoryEditData
-        }
-    }).when('/category-delete/:categoryName', {
-        controller: 'CategoryDeleteController',
-        templateUrl: 'flashcardagent/partials/category-delete.html',
-        title: 'Delete a Category',
-        icon: 'remove',
-        resolve: {
-           loadCategoryDeleteData: CategoryDeleteController.loadCategoryDeleteData
-        }
-    }).when('/category-view/:categoryName', {
-        controller: 'CategoryViewController',
-        templateUrl: 'flashcardagent/partials/category-view.html',
-        title: 'Manage Category',
-        icon: 'folder',
-        resolve: {
-           loadCategoryViewData: CategoryViewController.loadCategoryViewData
-        }
-    }).when('/deck-add/:categoryName', {
+        title: 'Manage Decks',
+        icon: 'folder'
+    }).when('/deck-add', {
         controller: 'DeckAddController',
         templateUrl: 'flashcardagent/partials/deck-add.html',
         title: 'Add a Deck',
-        icon: 'plus',
-        resolve: {
-           loadDeckAddData: DeckAddController.loadDeckAddData
-        }
-    }).when('/deck-edit/:categoryName/:deckName', {
+        icon: 'plus'
+    }).when('/deck-edit/:deckId', {
         controller: 'DeckEditController',
         templateUrl: 'flashcardagent/partials/deck-edit.html',
         title: 'Edit a Deck',
-        icon: 'edit',
-        resolve: {
-           loadDeckEditData: DeckEditController.loadDeckEditData
-        }
-    }).when('/deck-delete/:categoryName/:deckName', {
+        icon: 'edit'
+    }).when('/deck-delete/:deckId', {
         controller: 'DeckDeleteController',
         templateUrl: 'flashcardagent/partials/deck-delete.html',
         title: 'Delete a Deck',
-        icon: 'remove',
-        resolve: {
-           loadDeckDeleteData: DeckDeleteController.loadDeckDeleteData
-        }
-    }).when('/deck-view/:categoryName/:deckName', {
+        icon: 'remove'
+    }).when('/deck-view/:deckId', {
         controller: 'DeckViewController',
         templateUrl: 'flashcardagent/partials/deck-view.html',
         title: 'Manage Deck',
-        icon: 'folder',
-        resolve: {
-           loadDeckViewData: DeckViewController.loadDeckViewData
-        }
-    }).when('/card-add/:categoryName/:deckName', {
+        icon: 'folder'
+    }).when('/card-add/:deckId', {
         controller: 'CardAddController',
         templateUrl: 'flashcardagent/partials/card-add.html',
         title: 'Add a Card',
-        icon: 'plus',
-        resolve: {
-           loadCardAddData: CardAddController.loadCardAddData
-        }
-    }).when('/card-edit/:categoryName/:deckName/:cardQuestion', {
+        icon: 'plus'
+    }).when('/card-edit/:deckId/:cardId', {
         controller: 'CardEditController',
         templateUrl: 'flashcardagent/partials/card-edit.html',
         title: 'Edit a Card',
-        icon: 'folder',
-        resolve: {
-           loadCardEditData: CardEditController.loadCardEditData
-        }
-    }).when('/card-delete/:categoryName/:deckName/:cardQuestion', {
+        icon: 'folder'
+    }).when('/card-delete/:deckId/:cardId', {
         controller: 'CardDeleteController',
         templateUrl: 'flashcardagent/partials/card-delete.html',
         title: 'Delte Card',
-        icon: 'remove',
-        resolve: {
-           loadCardDeleteData: CardDeleteController.loadCardDeleteData
-        }
+        icon: 'remove'
     }).when('/card', {
         controller: 'CardController',
         templateUrl: 'flashcardagent/partials/card.html',
         title: 'Study',
-        icon: 'photo',
-        resolve: {
-           loadCardData: CardController.loadCardData
-        }
+        icon: 'photo'
     }).when('/sync', {
         controller: 'SyncController',
         templateUrl: 'flashcardagent/partials/sync.html',

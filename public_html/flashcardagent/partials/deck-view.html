@@ -1,10 +1,10 @@
 <div class="columns large-12">
 
     <div class="columns large-12">
-        <button class="secondary small right" ng-click="backToCategory()">
-            Back to category
+        <button class="secondary small right" ng-click="back(deck._id)">
+            Back
         </button>
-        <h4>Deck name: {{chosenDeck}}</h4>
+        <h4>Deck name: {{deck.name}}</h4>
         <message></message>
     </div>
 
@@ -63,7 +63,7 @@
                     <th class="hide-for-small">Created time</th>
                     <th class="hide-for-small">Last update</th>
                     <th>
-                        <a ng-click="addNewCard()">Add card <i class="foundicon-plus"></i></a>
+                        <a ng-click="addNewCard(deck._id)">Add card <i class="foundicon-plus"></i></a>
                     </th>
                 </tr>
             </thead>
@@ -82,12 +82,12 @@
                     <td class="hide-for-small">{{card.created| date:'MMM d, y h:mm:ss'}}</td>
                     <td class="hide-for-small">{{card.updated| date:'MMM d, y h:mm:ss'}}</td>
                     <td>
-                        <a ng-click="edit(card.question)">
+                        <a ng-click="edit(deck._id, card.id)">
                             <i class="foundicon-edit"></i>
                             Edit
                         </a>
                         &nbsp;
-                        <a style="color: #cc292c;" ng-click="delete(card.question)">
+                        <a style="color: #cc292c;" ng-click="delete(deck._id, card.id)">
                             Delete
                             <i class="foundicon-remove"></i>
                         </a>

@@ -14,7 +14,7 @@ flashcardAgent.controller('NavController', function($scope, goToService, $route,
         },
         {
             url: '/data-view',
-            title: 'Manage Data',
+            title: 'Manage Decks',
             icon: 'folder'
         },
         {
@@ -50,20 +50,25 @@ flashcardAgent.controller('NavController', function($scope, goToService, $route,
 //----------------------------------------------------------------------------//
 
 var IndexController = flashcardAgent.controller('IndexController', function(
-        $scope, $timeout, $q, $route) {
+        $scope, $timeout, $q, dbService) {
 
     $scope.showInit = false;
     $scope.showReady = false;
     $scope.showError = false;
     var defer = $q.defer();
-    var doc;
+    var settings;
 
     defer.promise.then(function() {
         $scope.showInit = true;
-        doc = $route.current.locals.loadIndexData;
+        $timeout(function() {
+            dbService.getFcSettings();
+            $scope.$on('getFcSettings', function(event, response) {
+                settings = response;
+            });
+        }, 1000);
     }).then(function() {
         $timeout(function() {
-            if (doc && doc.categories !== undefined) {
+            if (settings && settings.ready === true) {
                 $scope.showInit = false;
                 $scope.showReady = true;
             }
@@ -71,415 +76,157 @@ var IndexController = flashcardAgent.controller('IndexController', function(
                 $scope.showInit = false;
                 $scope.showError = true;
             }
-        }, 4500);
+        }, 2000);
     });
     defer.resolve();
 });
-
-IndexController.loadIndexData = function($q, dbService, $timeout) {
-    var defer = $q.defer();
-    $timeout(function() {
-        var doc = dbService.getFcDoc();
-        defer.resolve(doc);
-    }, 1500);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // DataViewController
 //----------------------------------------------------------------------------//
 
 var DataViewController = flashcardAgent.controller('DataViewController', function(
-        $scope, goToService, $route, categoryService) {
-
-    categoryService.reset();
-    var doc = $route.current.locals.loadDataViewData;
-    $scope.categories = doc.categories;
-    $scope.startLimit = 1;
-    $scope.endLimit = doc ? doc.categories.length : 1;
-    $scope.reverseBool = false;
-    $scope.resultOrder = 'created';
-
-    $scope.addNewCategory = function() {
-        goToService.go('/category-add');
-    };
-    $scope.edit = function(index) {
-        goToService.go('/category-edit/' + index);
-    };
-    $scope.delete = function(name) {
-        goToService.go('/category-delete/' + name);
-    };
-    $scope.goToCategory = function(name) {
-        goToService.go('/category-view/' + name);
-    };
-    $scope.$watch(function() {
-        $scope.reverse = ($scope.reverseBool === false) ? '' : '-';
-    });
-});
-
-DataViewController.loadDataViewData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
-
-//----------------------------------------------------------------------------//
-// CategoryAddController
-//----------------------------------------------------------------------------//
-
-var CategoryAddController = flashcardAgent.controller('CategoryAddController', function(
-        $scope, goToService, categoryService, $route) {
-
-    var doc = $route.current.locals.loadCategoryAddData;
-    $scope.category = categoryService.new();
-
-    $scope.add = function() {
-        categoryService.setName($scope.category.name);
-        categoryService.add($scope.category, doc);
-        goToService.go('/data-view');
-    };
-    $scope.cancel = function() {
-        goToService.go('/data-view');
-    };
-});
-
-CategoryAddController.loadCategoryAddData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
-
-//----------------------------------------------------------------------------//
-// CategoryEditController
-//----------------------------------------------------------------------------//
-
-var CategoryEditController = flashcardAgent.controller('CategoryEditController', function(
-        $scope, categoryService, goToService, $route, $routeParams) {
-
-    var doc = $route.current.locals.loadCategoryEditData;
-    $scope.category;
-
-    for (var i = 0; i < doc.categories.length; i++) {
-        if (doc.categories[i].name === $routeParams.categoryName) {
-            $scope.category = doc.categories[i];
-        }
-    }
-    $scope.save = function() {
-        $scope.category.updated = Date.now() || +new Date();
-        categoryService.save(doc);
-        goToService.go('/data-view');
-    };
-    $scope.cancel = function() {
-        goToService.go('/data-view');
-    };
-});
-
-CategoryEditController.loadCategoryEditData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
-
-//----------------------------------------------------------------------------//
-// CategoryDeleteController
-//----------------------------------------------------------------------------//
-
-var CategoryDeleteController = flashcardAgent.controller('CategoryDeleteController', function(
-        $scope, categoryService, goToService, $route, $routeParams) {
-
-    var doc = $route.current.locals.loadCategoryDeleteData;
-    var index;
-    $scope.category;
-
-    for (var i = 0; i < doc.categories.length; i++) {
-        if (doc.categories[i].name === $routeParams.categoryName) {
-            $scope.category = doc.categories[i];
-            index = i;
-        }
-    }
-    $scope.delete = function() {
-        for (var i = 0; i < doc.categories.length; i++) {
-            var decks = doc.categories[i].decks;
-            for (var i = 0; i < decks.length; i++) {
-                var cards = decks[i].cards;
-                for (var i = 0; i < cards.length; i++) {
-                    delete doc._attachments[cards[i].questionImage];
-                    delete doc._attachments[cards[i].answerImage];
-                    delete doc._attachments[cards[i].notesImage];
-                }
-            }
-        }
-        categoryService.delete(index, doc);
-        goToService.go('/data-view');
-    };
-    $scope.cancel = function() {
-        goToService.go('/data-view');
-    };
-});
-
-CategoryDeleteController.loadCategoryDeleteData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
-
-//----------------------------------------------------------------------------//
-// CategoryViewController
-//----------------------------------------------------------------------------//
-
-var CategoryViewController = flashcardAgent.controller('CategoryViewController', function(
-        $scope, goToService, $route, deckService, $routeParams) {
+        $scope, goToService, deckService, dbService) {
 
     deckService.reset();
-    var doc = $route.current.locals.loadCategoryViewData;
-    $scope.categories = doc.categories;
-    $scope.chosenCategory;
-    $scope.categoryObject;
-    $scope.decks;
-    $scope.startLimit = 1;
-    $scope.reverseBool = false;
-    $scope.resultOrder = 'created';
+    dbService.getFcDecks();
+    $scope.$on('getFcDecks', function(event, response) {
+        $scope.$apply(function() {
+            $scope.decks = response;
+            $scope.endLimit = $scope.decks.length - 1;
+            $scope.startLimit = 1;
+            $scope.reverseBool = false;
+            $scope.resultOrder = 'doc.created';
+        });
+    });
 
-    if ($scope.categories && $scope.categories.length > 0) {
-        $scope.chosenCategory = $routeParams.categoryName !== 'deckview' ?
-                $routeParams.categoryName : $scope.categories[0].name;
-        for (var i = 0; i < $scope.categories.length; i++) {
-            if ($scope.categories[i].name === $scope.chosenCategory) {
-                $scope.categoryObject = $scope.categories[i];
-            }
-        }
-        $scope.decks = $scope.categoryObject.decks;
-        $scope.endLimit = $scope.decks.length;
-    }
-    $scope.addNewDeck = function(categoryName) {
-        goToService.go('/deck-add/' + categoryName);
+    $scope.addNewDeck = function() {
+        goToService.go('/deck-add');
     };
-    $scope.backToCategories = function() {
-        goToService.go('/data-view/');
+    $scope.edit = function(id) {
+        goToService.go('/deck-edit/' + id);
     };
-    $scope.addNewDeck = function(name) {
-        goToService.go('/deck-add/' + name);
+    $scope.delete = function(id) {
+        goToService.go('/deck-delete/' + id);
     };
-    $scope.edit = function(nameArray) {
-        goToService.go('/deck-edit/' + nameArray[0] + '/' + nameArray[1]);
-    };
-    $scope.delete = function(nameArray) {
-        goToService.go('/deck-delete/' + nameArray[0] + '/' + nameArray[1]);
-    };
-    $scope.goToDeck = function(nameArray) {
-        goToService.go('/deck-view/' + nameArray[0] + '/' + nameArray[1]);
+    $scope.goToDeck = function(id) {
+        goToService.go('/deck-view/' + id);
     };
     $scope.$watch(function() {
         $scope.reverse = ($scope.reverseBool === false) ? '' : '-';
     });
 });
-
-CategoryViewController.loadCategoryViewData = function($q, dbService) {
-    var doc = dbService.getFcDoc();
-    var defer = $q.defer();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // DeckAddController
 //----------------------------------------------------------------------------//
 
 var DeckAddController = flashcardAgent.controller('DeckAddController', function(
-        $scope, $routeParams, goToService, deckService, $route) {
+        $scope, goToService, deckService, dbService) {
 
-    var doc = $route.current.locals.loadDeckAddData;
-    $scope.categories = doc.categories;
-    $scope.chosenCategory = $routeParams.categoryName;
     $scope.deck = deckService.entity;
 
     $scope.add = function() {
-        deckService.add($scope.chosenCategory, doc);
-        goToService.go('/category-view/' + $scope.chosenCategory);
+        dbService.postFcDoc($scope.deck);
+        goToService.go100('/data-view');
     };
+
     $scope.cancel = function() {
-        goToService.go('/category-view/' + $scope.chosenCategory);
+        goToService.go('/data-view');
     };
 
 });
-
-DeckAddController.loadDeckAddData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // DeckEditController
 //----------------------------------------------------------------------------//
 
 var DeckEditController = flashcardAgent.controller('DeckEditController', function(
-        $scope, $routeParams, goToService, $route, deckService, $sanitize) {
+        $scope, $routeParams, goToService, dbService) {
 
-    var doc = $route.current.locals.loadDeckEditData;
-    $scope.categories = doc.categories;
-    $scope.chosenCategory = $routeParams.categoryName;
-    $scope.chosenDeck = $routeParams.deckName;
-    $scope.categoryObject;
-    $scope.deck;
+    dbService.getFcDeck($routeParams.deckId);
+    $scope.$on('getFcDeck', function(event, response) {
+        $scope.$apply(function() {
+            $scope.deck = response;
+        });
+    });
 
-    for (var i = 0; i < $scope.categories.length; i++) {
-        if ($scope.categories[i].name === $scope.chosenCategory) {
-            $scope.categoryObject = $scope.categories[i];
-        }
-    }
-    for (var i = 0; i < $scope.categoryObject.decks.length; i++) {
-        if ($scope.categoryObject.decks[i].name === $scope.chosenDeck) {
-            $scope.deck = $scope.categoryObject.decks[i];
-        }
-    }
     $scope.save = function() {
-        $scope.deck.name = $sanitize($scope.deck.name);
         $scope.deck.updated = Date.now() || +new Date();
-        deckService.save(doc);
-        goToService.go('/category-view/' + $scope.chosenCategory);
+        dbService.putFcDoc($scope.deck);
+        goToService.go100('/data-view');
     };
     $scope.cancel = function() {
-        goToService.go('/category-view/' + $scope.chosenCategory);
+        goToService.go('/data-view');
     };
 });
-
-DeckEditController.loadDeckEditData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // DeckDeleteController
 //----------------------------------------------------------------------------//
 
 var DeckDeleteController = flashcardAgent.controller('DeckDeleteController', function(
-        $scope, $routeParams, $route, goToService, deckService) {
+        $scope, $routeParams, goToService, dbService) {
 
-    var doc = $route.current.locals.loadDeckDeleteData;
-    $scope.categories = doc.categories;
-    $scope.chosenCategory = $routeParams.categoryName;
-    $scope.chosenDeck = $routeParams.deckName;
-    $scope.categoryObject;
-    $scope.deck;
+    dbService.getFcDeck($routeParams.deckId);
+    $scope.$on('getFcDeck', function(event, response) {
+        $scope.$apply(function() {
+            $scope.deck = response;
+        });
+    });
 
-    for (var i = 0; i < $scope.categories.length; i++) {
-        if ($scope.categories[i].name === $scope.chosenCategory) {
-            $scope.categoryObject = $scope.categories[i];
-        }
-    }
-    var index;
-    for (var i = 0; i < $scope.categoryObject.decks.length; i++) {
-        if ($scope.categoryObject.decks[i].name === $scope.chosenDeck) {
-            $scope.deck = $scope.categoryObject.decks[i];
-            index = i;
-        }
-    }
     $scope.delete = function() {
-        for (var i = 0; i < $scope.categories.length; i++) {
-            var decks = $scope.categories[i].decks;
-            for (var i = 0; i < decks.length; i++) {
-                var cards = decks[i].cards;
-                for (var i = 0; i < cards.length; i++) {
-                    delete doc._attachments[cards[i].questionImage];
-                    delete doc._attachments[cards[i].answerImage];
-                    delete doc._attachments[cards[i].notesImage];
-                }
-            }
-        }
-        $scope.categoryObject.decks.splice(index, 1);
-        deckService.save(doc);
-        goToService.go('/category-view/' + $scope.chosenCategory);
+        dbService.deleteFcDoc($scope.deck);
+        goToService.go100('/data-view');
     };
     $scope.cancel = function() {
-        goToService.go('/category-view/' + $scope.chosenCategory);
+        goToService.go('/data-view');
     };
 });
-
-DeckDeleteController.loadDeckDeleteData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // DeckViewController
 //----------------------------------------------------------------------------//
 
 var DeckViewController = flashcardAgent.controller('DeckViewController', function(
-        $scope, $routeParams, goToService, $route) {
+        $scope, $routeParams, goToService, dbService) {
 
-    var doc = $route.current.locals.loadDeckViewData;
-    $scope.categories = doc.categories;
-    $scope.chosenCategory = $routeParams.categoryName;
-    $scope.chosenDeck = $routeParams.deckName;
-    $scope.categoryObject;
-    $scope.deck;
-    $scope.cards;
-    $scope.startLimit = 1;
-    $scope.endLimit;
-    $scope.reverseBool = false;
-    $scope.resultOrder = 'created';
+    dbService.getFcDeck($routeParams.deckId);
+    $scope.$on('getFcDeck', function(event, response) {
+        $scope.$apply(function() {
+            $scope.deck = response;
+            $scope.cards = $scope.deck.cards;
+            $scope.endLimit = $scope.cards.length;
+            $scope.startLimit = 1;
+            $scope.endLimit;
+            $scope.reverseBool = false;
+            $scope.resultOrder = 'created';
+        });
+    });
 
-    if ($scope.categories) {
-        for (var i = 0; i < $scope.categories.length; i++) {
-            if ($scope.categories[i].name === $scope.chosenCategory) {
-                $scope.categoryObject = $scope.categories[i];
-            }
-        }
-    }
-    var index;
-    if ($scope.categoryObject) {
-        for (var i = 0; i < $scope.categoryObject.decks.length; i++) {
-            if ($scope.categoryObject.decks[i].name === $scope.chosenDeck) {
-                $scope.deck = $scope.categoryObject.decks[i];
-                index = i;
-            }
-        }
-    }
-    if ($scope.deck) {
-        $scope.cards = $scope.deck.cards;
-        $scope.endLimit = $scope.cards.length;
-    }
-
-    $scope.backToCategory = function() {
-        goToService.go('/category-view/' + $scope.chosenCategory);
+    $scope.back = function() {
+        goToService.go('/data-view');
     };
-    $scope.addNewCard = function() {
-        goToService.go('/card-add/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+    $scope.addNewCard = function(_id) {
+        goToService.go('/card-add/' + _id);
     };
-    $scope.edit = function(name) {
-        goToService.go('/card-edit/' + $scope.chosenCategory + '/' + $scope.chosenDeck + '/' + name);
+    $scope.edit = function(deckId, cardId) {
+        goToService.go('/card-edit/' + deckId + '/' + cardId);
     };
-    $scope.delete = function(name) {
-        goToService.go('/card-delete/' + $scope.chosenCategory + '/' + $scope.chosenDeck + '/' + name);
+    $scope.delete = function(deckId, cardId) {
+        goToService.go('/card-delete/' + deckId + '/' + cardId);
     };
     $scope.$watch(function() {
         $scope.reverse = ($scope.reverseBool === false) ? '' : '-';
     });
 });
 
-DeckViewController.loadDeckViewData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
-
 //----------------------------------------------------------------------------//
 // CardAddController
 //----------------------------------------------------------------------------//
 
 var CardAddController = flashcardAgent.controller('CardAddController', function(
-        $scope, goToService, $routeParams, cardService, $route, guidService) {
+        $scope, goToService, $routeParams, cardService, dbService, guidService) {
 
     // Reflow Foundation sections.
     $(document).foundation('section', 'reflow');
@@ -487,9 +234,12 @@ var CardAddController = flashcardAgent.controller('CardAddController', function(
     // Initalize new card entity.
     cardService.reset();
 
-    var doc = $route.current.locals.loadCardAddData;
-    $scope.chosenCategory = $routeParams.categoryName;
-    $scope.chosenDeck = $routeParams.deckName;
+    dbService.getFcDeck($routeParams.deckId);
+    $scope.$on('getFcDeck', function(event, response) {
+        $scope.$apply(function() {
+            $scope.deck = response;
+        });
+    });
     $scope.card = cardService.entity;
 
     $scope.addImage = function(fileObject) {
@@ -505,7 +255,7 @@ var CardAddController = flashcardAgent.controller('CardAddController', function(
                 $scope.card.notesImage = id;
                 break;
         }
-        doc._attachments[id] = {
+        $scope.deck._attachments[id] = {
             content_type: 'image/png',
             data: fileObject.file
         };
@@ -514,63 +264,108 @@ var CardAddController = flashcardAgent.controller('CardAddController', function(
     $scope.removeImage = function(canvas) {
         switch (canvas) {
             case 'question':
-                delete doc._attachments[$scope.card.questionImage];
+                delete $scope.deck._attachments[$scope.card.questionImage];
                 $scope.card.questionImage = undefined;
-                $scope.files.question = undefined;
+                //$scope.files.question = undefined;
                 break;
             case 'answer':
-                delete doc._attachments[$scope.card.answerImage];
+                delete $scope.deck._attachments[$scope.card.answerImage];
                 $scope.card.answerImage = undefined;
-                $scope.files.answer = undefined;
+                //$scope.files.answer = undefined;
                 break;
             case 'notes':
-                delete doc._attachments[$scope.card.notesImage];
+                delete $scope.deck._attachments[$scope.card.notesImage];
                 $scope.card.notesImage = undefined;
-                $scope.files.answer = undefined;
+                //$scope.files.answer = undefined;
                 break;
         }
         console.log($scope.files);
     };
 
     // Add card to database.
-    $scope.add = function() {
-        cardService.add(doc, $scope.chosenCategory, $scope.chosenDeck);
-        goToService.go('/deck-view/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+    $scope.save = function() {
+        $scope.card.id = guidService.get();
+        $scope.card.created = Date.now() || +new Date();
+        $scope.card.updated = Date.now() || +new Date();
+        $scope.deck.cards.push($scope.card);
+        dbService.putFcDoc($scope.deck);
+        goToService.go100('/deck-view/' + $scope.deck._id);
     };
 
     // Cancel card add.
     $scope.cancel = function() {
-        goToService.go('/deck-view/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+        goToService.go('/deck-view/' + $scope.deck._id);
     };
 });
-
-CardAddController.loadCardAddData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // CardEditController
 //----------------------------------------------------------------------------//
 
 var CardEditController = flashcardAgent.controller('CardEditController', function(
-        $scope, $routeParams, $route, cardService, dbService, $timeout, fileService,
-        guidService, goToService, $sanitize) {
+        $scope, $routeParams, dbService, $timeout, fileService, guidService,
+        goToService) {
 
     // Reflow Foundation sections.
     $(document).foundation('section', 'reflow');
 
-    var doc = $route.current.locals.loadCardEditData;
-    $scope.categories = doc.categories;
-    $scope.chosenCategory = $routeParams.categoryName;
-    $scope.chosenDeck = $routeParams.deckName;
-    $scope.chosenCard = $routeParams.cardQuestion;
-    $scope.categoryObject;
-    $scope.deck;
-    $scope.cards;
-    $scope.card;
+    dbService.getFcDeck($routeParams.deckId);
+    $scope.$on('getFcDeck', function(event, response) {
+        $scope.$apply(function() {
+
+            $scope.deck = response;
+            $scope.cards = $scope.deck.cards;
+
+            for (var i = 0; i < $scope.cards.length; i++) {
+                if ($scope.cards[i].id === $routeParams.cardId) {
+                    $scope.card = $scope.cards[i];
+                }
+            }
+
+            if ($scope.card.questionImage) {
+                dbService.getAttachment($scope.deck._id, $scope.card.questionImage, {}, function(error, response) {
+                    if (error) {
+                        console.log('Get attachment error: ');
+                        console.log(error);
+                    }
+                    else {
+                        $timeout(function() {
+                            $scope.questionImageAttachment = fileService.getBlobUrl(response);
+                        }, 100);
+                    }
+                });
+            }
+
+            if ($scope.card.answerImage) {
+                dbService.getAttachment($scope.deck._id, $scope.card.answerImage, {}, function(error, response) {
+                    if (error) {
+                        console.log('Get attachment error: ');
+                        console.log(error);
+                    }
+                    else {
+                        $timeout(function() {
+                            $scope.answerImageAttachment = fileService.getBlobUrl(response);
+                        }, 100);
+                    }
+                });
+            }
+
+            if ($scope.card.notesImage) {
+                dbService.getAttachment($scope.deck._id, $scope.card.notesImage, {}, function(error, response) {
+                    if (error) {
+                        console.log('Get attachment error: ');
+                        console.log(error);
+                    }
+                    else {
+                        $timeout(function() {
+                            $scope.notesImageAttachment = fileService.getBlobUrl(response);
+                        }, 100);
+                    }
+                });
+            }
+        });
+    });
+
     $scope.showQuestionImageCanvas = false;
     $scope.showQuestionImageAttachment = true;
     $scope.showAnswerImageCanvas = false;
@@ -578,101 +373,32 @@ var CardEditController = flashcardAgent.controller('CardEditController', functio
     $scope.showNotesImageCanvas = false;
     $scope.showNotesImageAttachment = true;
 
-    if ($scope.categories) {
-        for (var i = 0; i < $scope.categories.length; i++) {
-            if ($scope.categories[i].name === $scope.chosenCategory) {
-                $scope.categoryObject = $scope.categories[i];
-            }
-        }
-    }
-    var index;
-    if ($scope.categoryObject) {
-        for (var i = 0; i < $scope.categoryObject.decks.length; i++) {
-            if ($scope.categoryObject.decks[i].name === $scope.chosenDeck) {
-                $scope.deck = $scope.categoryObject.decks[i];
-                index = i;
-            }
-        }
-    }
-    if ($scope.deck) {
-        $scope.cards = $scope.deck.cards;
-    }
-    if ($scope.cards) {
-        for (var i = 0; i < $scope.cards.length; i++) {
-            if ($scope.cards[i].question === $scope.chosenCard) {
-                $scope.card = $scope.cards[i];
-            }
-        }
-    }
-
-    if ($scope.card.questionImage) {
-        dbService.getAttachment(doc._id, $scope.card.questionImage, {}, function(error, response) {
-            if (error) {
-                console.log('Get attachment error: ');
-                console.log(error);
-            }
-            else {
-                $timeout(function() {
-                    $scope.questionImageAttachment = fileService.getBlobUrl(response);
-                }, 100);
-            }
-        });
-    }
-
-    if ($scope.card.answerImage) {
-        dbService.getAttachment(doc._id, $scope.card.answerImage, {}, function(error, response) {
-            if (error) {
-                console.log('Get attachment error: ');
-                console.log(error);
-            }
-            else {
-                $timeout(function() {
-                    $scope.answerImageAttachment = fileService.getBlobUrl(response);
-                }, 100);
-            }
-        });
-    }
-
-    if ($scope.card.notesImage) {
-        dbService.getAttachment(doc._id, $scope.card.notesImage, {}, function(error, response) {
-            if (error) {
-                console.log('Get attachment error: ');
-                console.log(error);
-            }
-            else {
-                $timeout(function() {
-                    $scope.notesImageAttachment = fileService.getBlobUrl(response);
-                }, 100);
-            }
-        });
-    }
-
     $scope.addImage = function(fileObject) {
         var id = guidService.get();
         switch (fileObject.canvas) {
             case 'question':
-                delete doc._attachments[$scope.card.questionImage];
+                delete $scope.deck._attachments[$scope.card.questionImage];
                 $scope.card.questionImage = id;
                 $scope.showQuestionImageCanvas = true;
                 $scope.showQuestionImageAttachment = false;
                 $scope.$apply();
                 break;
             case 'answer':
-                delete doc._attachments[$scope.card.answerImage];
+                delete $scope.deck._attachments[$scope.card.answerImage];
                 $scope.card.answerImage = id;
                 $scope.showAnswerImageCanvas = true;
                 $scope.showAnswerImageAttachment = false;
                 $scope.$apply();
                 break;
             case 'notes':
-                delete doc._attachments[$scope.card.notesImage];
+                delete $scope.deck._attachments[$scope.card.notesImage];
                 $scope.card.notesImage = id;
                 $scope.showNotesImageCanvas = true;
                 $scope.showNotesImageAttachment = false;
                 $scope.$apply();
                 break;
         }
-        doc._attachments[id] = {
+        $scope.deck._attachments[id] = {
             content_type: 'image/png',
             data: fileObject.file
         };
@@ -681,19 +407,19 @@ var CardEditController = flashcardAgent.controller('CardEditController', functio
     $scope.removeImage = function(canvas) {
         switch (canvas) {
             case 'question':
-                delete doc._attachments[$scope.card.questionImage];
+                delete $scope.deck._attachments[$scope.card.questionImage];
                 $scope.showQuestionImageCanvas = false;
                 $scope.showQuestionImageAttachment = false;
                 $scope.card.questionImage = undefined;
                 break;
             case 'answer':
-                delete doc._attachments[$scope.card.answerImage];
+                delete $scope.deck._attachments[$scope.card.answerImage];
                 $scope.showAnswerImageCanvas = false;
                 $scope.showAnswerImageAttachment = false;
                 $scope.card.answerImage = undefined;
                 break;
             case 'notes':
-                delete doc._attachments[$scope.card.notesImage];
+                delete $scope.deck._attachments[$scope.card.notesImage];
                 $scope.showNotesImageCanvas = false;
                 $scope.showNotesImageAttachment = false;
                 $scope.card.notesImage = undefined;
@@ -702,121 +428,78 @@ var CardEditController = flashcardAgent.controller('CardEditController', functio
     };
 
     $scope.save = function() {
-        $scope.card.question = $sanitize($scope.card.question);
-        $scope.card.answer = $sanitize($scope.card.answer);
-        $scope.card.notes = $sanitize($scope.card.notes);
         $scope.card.updated = Date.now() || +new Date();
-        cardService.save(doc);
-        goToService.go('/deck-view/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+        dbService.putFcDoc($scope.deck);
+        goToService.go300('/deck-view/' + $scope.deck._id);
     };
 
     // Cancel card add.
     $scope.cancel = function() {
-        goToService.go('/deck-view/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+        goToService.go('/deck-view/' + $scope.deck._id);
     };
 });
-
-CardEditController.loadCardEditData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // CardDeleteController
 //----------------------------------------------------------------------------//
 
 var CardDeleteController = flashcardAgent.controller('CardDeleteController', function(
-        $scope, $routeParams, $route, goToService, cardService) {
+        $scope, $routeParams, goToService, dbService) {
 
-    var doc = $route.current.locals.loadCardDeleteData;
-    $scope.chosenCategory = $routeParams.categoryName;
-    $scope.chosenDeck = $routeParams.deckName;
-    $scope.chosenCard = $routeParams.cardQuestion;
-    $scope.categories = doc.categories;
-    $scope.categoryObject;
-    $scope.deck;
-    $scope.cards;
-    $scope.card;
     var index;
-
-    if ($scope.categories) {
-        for (var i = 0; i < $scope.categories.length; i++) {
-            if ($scope.categories[i].name === $scope.chosenCategory) {
-                $scope.categoryObject = $scope.categories[i];
+    dbService.getFcDeck($routeParams.deckId);
+    $scope.$on('getFcDeck', function(event, response) {
+        $scope.$apply(function() {
+            $scope.deck = response;
+            $scope.cards = $scope.deck.cards;
+            for (var i = 0; i < $scope.cards.length; i++) {
+                if ($scope.cards[i].id === $routeParams.cardId) {
+                    $scope.card = $scope.cards[i];
+                    index = i;
+                }
             }
-        }
-    }
-    if ($scope.categoryObject) {
-        for (var i = 0; i < $scope.categoryObject.decks.length; i++) {
-            if ($scope.categoryObject.decks[i].name === $scope.chosenDeck) {
-                $scope.deck = $scope.categoryObject.decks[i];
-                index = i;
-            }
-        }
-    }
-    if ($scope.deck) {
-        $scope.cards = $scope.deck.cards;
-    }
-    if ($scope.cards) {
-        for (var i = 0; i < $scope.cards.length; i++) {
-            if ($scope.cards[i].question === $scope.chosenCard) {
-                $scope.card = $scope.cards[i];
-                index = i;
-            }
-        }
-    }
+        });
+    });
 
     $scope.delete = function() {
         $scope.cards.splice(index, 1);
-        delete doc._attachments[$scope.card.questionImage];
-        delete doc._attachments[$scope.card.answerImage];
-        delete doc._attachments[$scope.card.notesImage];
-        cardService.save(doc);
-        goToService.go('/deck-view/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+        delete $scope.deck._attachments[$scope.card.questionImage];
+        delete $scope.deck._attachments[$scope.card.answerImage];
+        delete $scope.deck._attachments[$scope.card.notesImage];
+        dbService.putFcDoc($scope.deck);
+        goToService.go100('/deck-view/' + $scope.deck._id);
     };
 
     $scope.cancel = function() {
-        goToService.go('/deck-view/' + $scope.chosenCategory + '/' + $scope.chosenDeck);
+        goToService.go('/deck-view/' + $scope.deck._id);
     };
 
 });
-
-CardDeleteController.loadCardDeleteData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // CardController
 //----------------------------------------------------------------------------//
 
 var CardController = flashcardAgent.controller('CardController', function(
-        Message, $scope, $route, showCardService, dbService, fileService, $timeout) {
+        Message, $scope, showCardService, dbService, fileService, $timeout, dbService) {
 
-    var doc = $route.current.locals.loadCardData;
-    $scope.categories = doc.categories;
-    $scope.decks = [];
-    $scope.chosenCategory = 0;
-    $scope.chosenDeck = 0;
-    $scope.chosenCard = 0;
-    $scope.category;
-    $scope.deck;
-    $scope.cards;
-    $scope.card;
-    $scope.cardIndex = 0;
-    $scope.content;
-    $scope.show = showCardService;
-    $scope.showCategorySelectOption = true;
-    $scope.stripedCard;
+    dbService.getFcDecks();
+    $scope.$on('getFcDecks', function(event, response) {
+        $scope.$apply(function() {
+            $scope.chosenDeck = 0;
+            $scope.chosenCard = 0;
+            $scope.cardIndex = 0;
+            $scope.content;
+            $scope.show = showCardService;
+            $scope.stripedCard;
 
-    // Images.
-    $scope.questionImageAttachment;
-    $scope.answerImageAttachment;
-    $scope.notesImageAttachment;
+            // Images.
+            $scope.questionImageAttachment;
+            $scope.answerImageAttachment;
+            $scope.notesImageAttachment;
+            $scope.decks = response;
+        });
+    });
 
     $scope.setDeck = function(index) {
         $scope.chosenDeck = index;
@@ -824,9 +507,8 @@ var CardController = flashcardAgent.controller('CardController', function(
     };
 
     $scope.setCard = function(index) {
-        $scope.chosenCard = index;
-        $scope.card = $scope.cards[$scope.chosenCard];
-        $scope.cardIndex = $scope.chosenCard;
+        $scope.cardIndex = index;
+        $scope.card = $scope.cards[index];
         setImages();
         Message.reset();
         $scope.show.showQuestion();
@@ -876,19 +558,9 @@ var CardController = flashcardAgent.controller('CardController', function(
         $('#card-box-content').fadeIn('slow');
     };
 
-    $scope.$watch('chosenCategory', function() {
-        $scope.category = $scope.categories[$scope.chosenCategory];
-        $scope.decks = $scope.category.decks;
-        $scope.deck = $scope.decks[0];
-        $scope.cards = $scope.deck.cards;
-        if ($scope.cards) {
-            $scope.setCard(0);
-        }
-    });
-
     $scope.$watch('chosenDeck', function() {
         $scope.deck = $scope.decks[$scope.chosenDeck];
-        $scope.cards = $scope.deck.cards;
+        $scope.cards = $scope.deck.doc.cards;
         $scope.card = $scope.cards[0];
         if ($scope.cards) {
             $scope.setCard(0);
@@ -912,7 +584,7 @@ var CardController = flashcardAgent.controller('CardController', function(
             fileService.revokeBlobUrl($scope.questionImageAttachment);
         }
         else {
-            dbService.getAttachment(doc._id, $scope.card.questionImage, {}, function(error, response) {
+            dbService.getAttachment($scope.deck.id, $scope.card.questionImage, {}, function(error, response) {
                 if (error) {
                     console.log('Get attachment error: ');
                     console.log(error);
@@ -929,7 +601,7 @@ var CardController = flashcardAgent.controller('CardController', function(
             fileService.revokeBlobUrl($scope.answerImageAttachment);
         }
         else {
-            dbService.getAttachment(doc._id, $scope.card.answerImage, {}, function(error, response) {
+            dbService.getAttachment($scope.deck.id, $scope.card.answerImage, {}, function(error, response) {
                 if (error) {
                     console.log('Get attachment error: ');
                     console.log(error);
@@ -946,7 +618,7 @@ var CardController = flashcardAgent.controller('CardController', function(
             fileService.revokeBlobUrl($scope.notesImageAttachment);
         }
         else {
-            dbService.getAttachment(doc._id, $scope.card.notesImage, {}, function(error, response) {
+            dbService.getAttachment($scope.deck.id, $scope.card.notesImage, {}, function(error, response) {
                 if (error) {
                     console.log('Get attachment error: ');
                     console.log(error);
@@ -966,13 +638,6 @@ var CardController = flashcardAgent.controller('CardController', function(
         Message.reset();
     };
 });
-
-CardController.loadCardData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // SyncController

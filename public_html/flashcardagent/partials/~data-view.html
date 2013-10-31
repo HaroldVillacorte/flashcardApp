@@ -1,12 +1,8 @@
 <div class="columns large-12">
 
-    <div class="columns large-12">
-        <button class="secondary small right" ng-click="backToCategories()">
-            Back to categories
-        </button>
-        <h4>Category: {{chosenCategory}}</h4>
-        <message></message>
-    </div>
+    <h4 class="columns large-4">Categories</h4>
+
+    <div class="columns large-8"><message></message></div>
 
     <div class="control-panel columns large-12">
         <div class="columns large-3">
@@ -23,22 +19,22 @@
                        ng-model="endLimit"
                        type="number"
                        min="{{startLimit}}"
-                       max="{{decks.length}}"
+                       max="{{categories.length}}"
                        />
             </div>
         </div>
 
         <div class="columns large-6">
-            <div class="columns large-9 small-9">
-                <span class="left columns large-4 small-4" style="text-align: right;"><strong>Sort:</strong></span>
-                <select name="order-by" ng-model="resultOrder" class="columns large-8 small-8">
-                    <option value="name">Name</option>
-                    <option value="created">Created time</option>
-                    <option value="updated">Last update</option>
-                </select>
-            </div>
+            <span class="left columns large-2 small-2" style="text-align: right;">
+                <strong>Sort:</strong>
+            </span>
+            <select name="order-by" ng-model="resultOrder" class="columns large-6 small-6">
+                <option value="name">Name</option>
+                <option value="created">Created time</option>
+                <option value="updated">Last update</option>
+            </select>
 
-            <div class="left columns large-3 small-3">
+            <div class="columns large-4 small-4">
                 <div class="inline left">
                     <label for="reverse">Reverse&nbsp;</label>
                 </div>
@@ -53,36 +49,34 @@
         </div>
     </div>
 
-
     <div class="table-wrapper columns large-12 auto-scroller-y" quickheight="70">
         <table width="100%">
             <thead>
                 <tr>
-                    <th>Deck Name</th>
+                    <th>Category Name</th>
                     <th class="hide-for-small">Created time</th>
                     <th class="hide-for-small">Last update</th>
                     <th>
-                        <a ng-click="addNewDeck(chosenCategory)">Add deck <i class="foundicon-plus"></i></a>
+                        <a ng-click="addNewCategory()">Add category <i class="foundicon-plus"></i></a>
                     </th>
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    ng-repeat="deck in decks|orderBy: reverse + resultOrder|limitRange:startLimit - 1:endLimit|filter: search">
+                <tr ng-repeat="category in categories|orderBy: reverse + resultOrder|limitRange:startLimit - 1:endLimit|filter: search">
                     <td>
-                        <a ng-click="goToDeck([chosenCategory, deck.name])">
-                            {{deck.name}}
+                        <a ng-click="goToCategory(category.id)">
+                            {{category.name}}
                         </a>
                     </td>
-                    <td class="hide-for-small">{{deck.created | date:'MMM d, y h:mm:ss'}}</td>
-                    <td class="hide-for-small">{{deck.updated | date:'MMM d, y h:mm:ss'}}</td>
+                    <td class="hide-for-small">{{category.created | date:'MMM d, y h:mm:ss'}}</td>
+                    <td class="hide-for-small">{{category.updated | date:'MMM d, y h:mm:ss'}}</td>
                     <td>
-                        <a ng-click="edit([chosenCategory, deck.name])">
+                        <a ng-click="edit(category.id)">
                             <i class="foundicon-edit"></i>
                             Edit
                         </a>
-                        &nbsp;
-                        <a style="color: #cc292c;" ng-click="delete([chosenCategory, deck.name])">
+                        &nbsp
+                        <a style="color: #cc292c;" ng-click="delete(category.id)">
                             Delete
                             <i class="foundicon-remove"></i>
                         </a>
