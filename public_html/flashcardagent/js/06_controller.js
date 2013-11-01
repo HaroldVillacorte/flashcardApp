@@ -731,23 +731,33 @@ SyncController.loadSyncData = function($q, dbService) {
 //----------------------------------------------------------------------------//
 
 var AccountController = flashcardAgent.controller('AccountController', function(
-        $scope, $route, Message, dbService, $timeout) {
+        $scope, Message, dbService, $timeout, dbService) {
 
-    var doc = $route.current.locals.loadAccountData;
     var signUpUrl = 'http://flashcard/rest-user-sign-up';
     var loginUrl = 'http://flashcard/rest-user-login';
-    $scope.username = doc.username ? doc.username : null;
-    $scope.email = doc.email ? doc.email : null;
-    $scope.password;
-    $scope.apiKey = doc.apiKey ? doc.apiKey : null;
-    $scope.apiExpire = doc.apiExpire ? doc.apiExpire : null;
-    $scope.newUsername;
-    $scope.newEmail;
-    $scope.newPassword;
-    $scope.showLogin = true;
-    $scope.showAccount = false;
-    $scope.showSignUp = false;
-    $scope.pleaseWait = false;
+
+    dbService.getFcSettings();
+    $scope.$on('getFcSettings', function(event, response) {
+        $scope.newUsername;
+        $scope.password;
+        $scope.newEmail;
+        $scope.newPassword;
+        $scope.showLogin = true;
+        $scope.showAccount = false;
+        $scope.showSignUp = false;
+        $scope.pleaseWait = false;
+
+        $scope.settings = response;
+        $scope.username = $scope.settings.username ? $scope.settings.username : null;
+        $scope.email = $scope.settings.email ? $scope.settings.email : null;
+        $scope.apiKey = $scope.settings.apiKey ? $scope.settings.apiKey : null;
+        $scope.apiExpire = $scope.settings.apiExpire ? $scope.settings.apiExpire : null;
+
+        if ($scope.username && $scope.apiExpire * 1000 >= Math.round((new Date()).getTime())) {
+            $scope.showLogin = false;
+            $scope.showAccount = true;
+        }
+    });
 
     $scope.showSignUpForm = function() {
         $scope.showLogin = false;
@@ -917,16 +927,4 @@ var AccountController = flashcardAgent.controller('AccountController', function(
             dataType: 'json'
         });
     };
-
-    if ($scope.username && $scope.apiExpire * 1000 >= Math.round((new Date()).getTime())) {
-        $scope.showLogin = false;
-        $scope.showAccount = true;
-    }
 });
-
-AccountController.loadAccountData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};

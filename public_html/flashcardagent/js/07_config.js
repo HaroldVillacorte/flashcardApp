@@ -61,10 +61,7 @@ flashcardAgent.config(function($routeProvider, $httpProvider) {
         controller: 'AccountController',
         templateUrl: 'flashcardagent/partials/account.html',
         title: 'Account',
-        icon: 'website',
-        resolve: {
-           loadAccountData: AccountController.loadAccountData
-        }
+        icon: 'website'
     }).otherwise({redirectTo: '/'});
 
     $httpProvider.defaults.useXDomain = true;
