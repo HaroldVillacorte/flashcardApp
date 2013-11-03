@@ -60,7 +60,7 @@ flashcardAgent.directive('imageDrop', function(fileService) {
             var DomUrlNotes;
             var dataUrl;
             var base64String;
-            var MAX_HEIGHT = 800;
+            var MAX_HEIGHT = 300;
             scope.message = undefined;
             scope.dropImage = function($file) {
                 scope.message = undefined;

@@ -53,10 +53,7 @@ flashcardAgent.config(function($routeProvider, $httpProvider) {
         controller: 'SyncController',
         templateUrl: 'flashcardagent/partials/sync.html',
         title: 'Account',
-        icon: 'globe',
-        resolve: {
-           loadSyncData: SyncController.loadSyncData
-        }
+        icon: 'globe'
     }).when('/account', {
         controller: 'AccountController',
         templateUrl: 'flashcardagent/partials/account.html',

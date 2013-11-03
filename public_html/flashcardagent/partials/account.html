@@ -9,16 +9,16 @@
 
         <div ng-show="showAccount">
             <h2>Account</h2>
-            <p>Username: {{username}}</p>
-            <p>Email: {{email}}</p>
-            <p>Login expires on: {{apiExpire * 1000 | date:'MMM d, y'}}</p>
+            <p>Username: {{settings.username}}</p>
+            <p>Email: {{settings.email}}</p>
+            <p>Login expires on: {{settings.apiExpire * 1000 | date:'MMM d, y'}}</p>
             <button class="radius" ng-click="logout()">Logout</button>
         </div>
 
         <div ng-show="showLogin">
             <h2>Login</h2>
             <label>Username:</label>
-            <input type="text" placeholder="Username" ng-model="username" />
+            <input type="text" placeholder="Username" ng-model="settings.username" />
             <label>Password:</label>
             <input type="password" placeholder="Password" ng-model="password" />
             <button class="radius" ng-click="login()">Login</button>
@@ -35,11 +35,11 @@
         <div ng-show="showSignUp">
             <h2>Sign Up</h2>
             <label>Username:</label>
-            <input type="text" placeholder="Username" ng-model="newUsername" />
+            <input type="text" placeholder="Username" ng-model="settings.username" />
             <label>Email:</label>
-            <input type="text" placeholder="Email" ng-model="newEmail" />
+            <input type="text" placeholder="Email" ng-model="settings.email" />
             <label>Password:</label>
-            <input type="password" placeholder="Password" ng-model="newPassword" />
+            <input type="password" placeholder="Password" ng-model="password" />
             <button class="radius left" ng-click="signUp()">Submit</button>&nbsp;
             <button class="radius secondary" ng-click="cancelSignUp()">Cancel</button>
         </div>

@@ -11,49 +11,47 @@
         </div>
 
         <div ng-show="showHome">
-            <p>
-                Last sync was on: {{syncTime | date: 'MMM d, y h:mm:ss a' || 'You have not synced your device yet.'}}
-            </p>
-            <p>
-                Last device save was on: {{updateTime | date: 'MMM d, y h:mm:ss a' || 'You have not saved any data.'}}
-            </p>
-            <h6>Pushing will send your device data to the server and overwrite the server.</h6>
-            <button class="success large radius" ng-click="choosePush()">
-                <i class="foundicon-refresh"></i>
-                Push
-                <i class="foundicon-up-arrow"></i>
-            </button>
-            <h6>Pulling will request your data from the server and overwrite the device.</h6>
-            <button class="success large radius" ng-click="choosePull()">
-                <i class="foundicon-refresh"></i>
-                Pull
-                <i class="foundicon-down-arrow"></i>
-            </button>
-        </div>
+            <table width="100%">
+                <thead>
+                    <tr>
+                        <th>Deck Name</th>
+                        <th>
+                            <a class="large-4 large-offset-4" ng-click="sync()">
+                                Sync
+                                <i class="foundicon-refresh"></i>
+                            </a>
+                        </th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="deck in decks" ng-show="deck.doc.name">
+                        <td>{{deck.doc.name}}</td>
+                        <td>
+                            <form>
+                                <label class="left large-3">
+                                    Pull
+                                    <input name="{{$index}}-sync-action" type="radio" ng-value="'pull'" ng-model="deck.syncAction" />
+                                </label>
+                                <label class="left large-3">
+                                    Push
+                                    <input name="{{$index}}-sync-action" type="radio" ng-value="'push'" ng-model="deck.syncAction" />
+                                </label>
+                                <label class="left large-3">
+                                    Delete
+                                    <input name="{{$index}}-sync-action" type="radio" ng-value="'delete'" ng-model="deck.syncAction" />
+                                </label>
+                                <label class="left large-3">
+                                    No action
+                                    <input name="{{$index}}-sync-action" type="radio" ng-value="'null'" ng-model="deck.syncAction" />
+                                </label>
+                            </form>
+                        </td>
+                        <td>{{deck.result}}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <div ng-show="showPush">
-            <h6>Are you sure that the device you are using has the latest data?</h6>
-            <button class="success large radius" ng-click="push()">
-                <i class="foundicon-refresh"></i>
-                Yes, Push Now
-                <i class="foundicon-up-arrow"></i>
-            </button>
-            <button class="secondary large radius" ng-click="cancel()">
-                Cancel
-            </button>
         </div>
-
-        <div ng-show="showPull">
-            <h6>Are you sure that the data on the server is more recent than the data on your device?</h6>
-            <button class="success large radius" ng-click="pull()">
-                <i class="foundicon-refresh"></i>
-                Yes, Pull Now
-                <i class="foundicon-down-arrow"></i>
-            </button>
-            <button class="secondary large radius" ng-click="cancel()">
-                Cancel
-            </button>
-        </div>
-
     </div>
 </div>

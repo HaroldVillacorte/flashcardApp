@@ -266,17 +266,14 @@ var CardAddController = flashcardAgent.controller('CardAddController', function(
             case 'question':
                 delete $scope.deck._attachments[$scope.card.questionImage];
                 $scope.card.questionImage = undefined;
-                //$scope.files.question = undefined;
                 break;
             case 'answer':
                 delete $scope.deck._attachments[$scope.card.answerImage];
                 $scope.card.answerImage = undefined;
-                //$scope.files.answer = undefined;
                 break;
             case 'notes':
                 delete $scope.deck._attachments[$scope.card.notesImage];
                 $scope.card.notesImage = undefined;
-                //$scope.files.answer = undefined;
                 break;
         }
         console.log($scope.files);
@@ -644,87 +641,149 @@ var CardController = flashcardAgent.controller('CardController', function(
 //----------------------------------------------------------------------------//
 
 var SyncController = flashcardAgent.controller('SyncController', function($scope,
-        $route, Message, dbService, $timeout, goToService) {
+        dbService, $timeout, goToService) {
 
-    var doc = $route.current.locals.loadSyncData;
-    var url = 'http://flashcard/rest-user-post-data';
-    $scope.syncTime = doc.syncTime;
-    $scope.updateTime = doc.updateTime;
-    $scope.showHome = false;
-    $scope.showPush = false;
-    $scope.showPull = false;
+    var pushUrl = 'http://flashcard/rest-push-data';
+    var pullUrl = 'http://flashcard/rest-pull-data';
+    $scope.showHome = true;
     $scope.pleaseWait = false;
+    $scope.i = 0;
 
-    if (!doc.username || !doc.apiExpire) {
-        goToService.go('/account');
-    }
-    else if (doc.apiExpire * 1000 < Math.round((new Date()).getTime())) {
-        goToService.go('/account');
-    }
-    else {
-        $scope.showHome = true;
-    }
+    dbService.getFcSettings();
+    $scope.$on('getFcSettings', function(event, response) {
+        $scope.$apply(function() {
+            $scope.settings = response;
+        });
+        if (!$scope.settings.username || !$scope.settings.apiExpire) {
+            goToService.go('/account');
+        }
+    });
 
-    $scope.choosePush = function() {
-        $scope.showHome = false;
-        $scope.showPush = true;
+    dbService.getFcDecks();
+    $scope.$on('getFcDecks', function(event, response) {
+        $scope.$apply(function() {
+            $scope.decks = response;
+            for (var i = 0; i < $scope.decks.length - 1; i++) {
+                $scope.decks[i].syncAction = 'null';
+            }
+        });
+    });
+
+    $scope.syncLoop = function() {
+        $timeout(function() {
+            if ($scope.i < $scope.decks.length - 1) {
+                $scope.sync();
+            }
+            else {
+                $scope.i = 0;
+            }
+        }, 500);
     };
 
-    $scope.choosePull = function() {
-        $scope.showHome = false;
-        $scope.showPull = true;
+    $scope.sync = function() {
+        switch ($scope.decks[$scope.i].syncAction) {
+            case 'push':
+                $scope.push($scope.decks[$scope.i]);
+                break;
+            case 'pull':
+                $scope.pull($scope.decks[$scope.i]);
+                break;
+            case 'delete':
+                $scope.decks[$scope.i].result = 'Deleted';
+                break;
+            default:
+                $scope.decks[$scope.i].result = 'No Action';
+        }
     };
 
-    $scope.cancel = function() {
-        $scope.showHome = true;
-        $scope.showPush = false;
-        $scope.showPull = false;
-    };
-
-    $scope.push = function() {
+    $scope.push = function(deck) {
         $.ajax({
-            type: "POST",
-            url: url,
-            data: {username: doc.username, apiKey: doc.apiKey, id: doc._id, data: doc},
+            type: 'POST',
+            url: pushUrl,
+            data: {
+                username: $scope.settings.username,
+                apiKey: $scope.settings.apiKey,
+                id: deck.id,
+                data: deck.doc
+            },
             beforeSend: function() {
-                $scope.pleaseWait = true;
-                $scope.showPush = false;
+                deck.result = 'Contacting server';
             },
             success: function(data) {
-                doc.syncTime = Date.now() || +new Date();
-                dbService.putFcDoc(doc);
-
-                $timeout(function() {
-                    $scope.pleaseWait = false;
-                    $scope.synced = true;
-                    $scope.needsSync = false;
-                    console.log(data);
-                }, 2000);
+                switch (data.result) {
+                    case true:
+                        deck.result = 'Push successful';
+                        break;
+                    case 'userNotFound':
+                        deck.result = 'Username not found';
+                        break;
+                    case 'apiKeyNotFound':
+                        deck.result = 'Api key not found';
+                        break;
+                    case 'apiKeyExpired':
+                        deck.result = 'Api key expired';
+                        break;
+                    default:
+                        deck.result = 'Database write error';
+                }
+                $scope.i++;
+                $scope.syncLoop();
             },
             error: function(error) {
-                $scope.$apply(function() {
-                    Message.set('There was an error synchronizing data', 'alert');
-                    $scope.pleaseWait = false;
-                    $scope.synced = false;
-                    $scope.needsSync = true;
-                });
+                deck.result = 'Push error';
                 console.log(error);
+                $scope.i++;
+                $scope.syncLoop();
             },
             dataType: 'json'
         });
     };
 
-    $scope.pull = function() {
-
+    $scope.pull = function(deck) {
+        $.ajax({
+            type: 'POST',
+            url: pullUrl,
+            data: {
+                username: $scope.settings.username,
+                apiKey: $scope.settings.apiKey,
+                id: deck.id
+            },
+            beforeSend: function() {
+                deck.result = 'Contacting server';
+            },
+            success: function(data) {
+                switch (data.result) {
+                    case false:
+                        deck.result = 'Database read error';
+                        break;
+                    case 'userNotFound':
+                        deck.result = 'Username not found';
+                        break;
+                    case 'apiKeyNotFound':
+                        deck.result = 'Api key not found';
+                        break;
+                    case 'apiKeyExpired':
+                        deck.result = 'Api key expired';
+                        break;
+                    default:
+                        data.result.updated = Date.now() || +new Date();
+                        dbService.putFcDoc(data.result);
+                        console.log(data.result);
+                        deck.result = 'Pull successful';
+                }
+                $scope.i++;
+                $scope.syncLoop();
+            },
+            error: function(error) {
+                deck.result = 'Pull error';
+                console.log(error);
+                $scope.i++;
+                $scope.syncLoop();
+            },
+            dataType: 'json'
+        });
     };
 });
-
-SyncController.loadSyncData = function($q, dbService) {
-    var defer = $q.defer();
-    var doc = dbService.getFcDoc();
-    defer.resolve(doc);
-    return defer.promise;
-};
 
 //----------------------------------------------------------------------------//
 // AccountController
@@ -738,25 +797,18 @@ var AccountController = flashcardAgent.controller('AccountController', function(
 
     dbService.getFcSettings();
     $scope.$on('getFcSettings', function(event, response) {
-        $scope.newUsername;
-        $scope.password;
-        $scope.newEmail;
-        $scope.newPassword;
-        $scope.showLogin = true;
-        $scope.showAccount = false;
-        $scope.showSignUp = false;
-        $scope.pleaseWait = false;
-
-        $scope.settings = response;
-        $scope.username = $scope.settings.username ? $scope.settings.username : null;
-        $scope.email = $scope.settings.email ? $scope.settings.email : null;
-        $scope.apiKey = $scope.settings.apiKey ? $scope.settings.apiKey : null;
-        $scope.apiExpire = $scope.settings.apiExpire ? $scope.settings.apiExpire : null;
-
-        if ($scope.username && $scope.apiExpire * 1000 >= Math.round((new Date()).getTime())) {
-            $scope.showLogin = false;
-            $scope.showAccount = true;
-        }
+        $scope.$apply(function() {
+            $scope.password;
+            $scope.showLogin = true;
+            $scope.showAccount = false;
+            $scope.showSignUp = false;
+            $scope.pleaseWait = false;
+            $scope.settings = response;
+            if ($scope.settings.username && $scope.settings.apiExpire * 1000 >= Math.round((new Date()).getTime())) {
+                $scope.showLogin = false;
+                $scope.showAccount = true;
+            }
+        });
     });
 
     $scope.showSignUpForm = function() {
@@ -772,16 +824,10 @@ var AccountController = flashcardAgent.controller('AccountController', function(
     };
 
     $scope.logout = function() {
-        $scope.username = undefined;
-        $scope.email = undefined;
-        $scope.apiKey = undefined;
-        $scope.apiExpire = undefined;
-        $scope.apiExpired = ($scope.apiExpire * 1000 < Math.round((new Date()).getTime()));
-        doc.username = $scope.username;
-        doc.email = $scope.email;
-        doc.apiKey = $scope.apiKey;
-        doc.apiExpire = $scope.apiExpire;
-        dbService.putFcDoc(doc);
+        $scope.settings.username = undefined;
+        $scope.settings.apiKey = undefined;
+        $scope.settings.apiExpire = undefined;
+        dbService.putFcDoc($scope.settings);
         $scope.showLogin = true;
         $scope.showAccount = false;
     };
@@ -790,7 +836,7 @@ var AccountController = flashcardAgent.controller('AccountController', function(
         $.ajax({
             type: 'POST',
             url: loginUrl,
-            data: {username: $scope.username, password: $scope.password},
+            data: {username: $scope.settings.username, password: $scope.password},
             beforeSend: function() {
                 $scope.pleaseWait = true;
                 $scope.showLogin = false;
@@ -826,14 +872,9 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                         }, 2000);
                         break;
                     default:
-                        $scope.email = data.result.email;
-                        $scope.apiKey = data.result.apiKey;
-                        $scope.apiExpire = data.result.apiExpire;
-                        doc.username = $scope.username;
-                        doc.email = $scope.email;
-                        doc.apiKey = $scope.apiKey;
-                        doc.apiExpire = $scope.apiExpire;
-                        dbService.putFcDoc(doc);
+                        $scope.settings.apiKey = data.result.apiKey;
+                        $scope.settings.apiExpire = data.result.apiExpire;
+                        dbService.putFcDoc($scope.settings);
                         $timeout(function() {
                             $scope.pleaseWait = false;
                             $scope.showAccount = true;
@@ -857,7 +898,7 @@ var AccountController = flashcardAgent.controller('AccountController', function(
         $.ajax({
             type: 'POST',
             url: signUpUrl,
-            data: {username: $scope.newUsername, email: $scope.newEmail, password: $scope.newPassword},
+            data: {username: $scope.settings.username, email: $scope.settings.email, password: $scope.password},
             beforeSend: function() {
                 $scope.pleaseWait = true;
                 $scope.showSignUp = false;
@@ -868,7 +909,7 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                         $timeout(function() {
                             $scope.pleaseWait = false;
                             $scope.showSignUp = true;
-                            Message.set('There was an error signing up.  Please try again.', 'alert');
+                            Message.set('There was an error signing up 1.  Please try again.', 'alert');
                         }, 2000);
                         break;
                     case 'uniqueUsername':
@@ -900,15 +941,9 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                         }, 2000);
                         break;
                     default:
-                        $scope.username = $scope.newUsername;
-                        $scope.email = $scope.newEmail;
-                        $scope.apiKey = data.result.apiKey;
-                        $scope.apiExpire = data.result.apiExpire;
-                        doc.username = $scope.username;
-                        doc.email = $scope.email;
-                        doc.apiKey = $scope.apiKey;
-                        doc.apiExpire = $scope.apiExpire;
-                        dbService.putFcDoc(doc);
+                        $scope.settings.apiKey = data.result.apiKey;
+                        $scope.settings.apiExpire = data.result.apiExpire;
+                        dbService.putFcDoc($scope.settings);
                         $timeout(function() {
                             $scope.pleaseWait = false;
                             $scope.showAccount = true;
@@ -918,7 +953,7 @@ var AccountController = flashcardAgent.controller('AccountController', function(
             },
             error: function(error) {
                 $timeout(function() {
-                    Message.set('There was an error signing up.  Please try again.', 'alert');
+                    Message.set('There was an error signing up 2.  Please try again.', 'alert');
                     $scope.pleaseWait = false;
                     $scope.showSignUp = true;
                 }, 2000);

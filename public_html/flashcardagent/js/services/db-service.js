@@ -6,7 +6,7 @@ flashcardAgent.factory('pouchDb', function() {
 flashcardAgent.factory('dbService', function(pouchDb, $rootScope, $sanitize) {
     var pouch = pouchDb;
     pouch.docInit = function() {
-        var data = {
+        var settings = {
             _id: 'settings',
             ready: true,
             username: undefined,
@@ -19,7 +19,7 @@ flashcardAgent.factory('dbService', function(pouchDb, $rootScope, $sanitize) {
                 console.log(error || response);
             }
             else if (error && error.status === 404) {
-                pouch.put(data, function(error, response) {
+                pouch.put(settings, function(error, response) {
                     console.log(error || response);
                 });
             }
