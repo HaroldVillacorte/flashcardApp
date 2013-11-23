@@ -792,7 +792,7 @@ var SyncController = flashcardAgent.controller('SyncController', function($scope
 var AccountController = flashcardAgent.controller('AccountController', function(
         $scope, Message, dbService, $timeout, dbService) {
 
-    var signUpUrl = 'http://localhost:5984/_users';
+    var signUpUrl = 'http://localhost:3000/put/user';
     var loginUrl = 'http://flashcard/rest-user-login';
 
     dbService.getFcSettings();
@@ -897,12 +897,9 @@ var AccountController = flashcardAgent.controller('AccountController', function(
     $scope.signUp = function() {
         $.ajax({
             type: 'PUT',
-            url: signUpUrl + '/org.couchdb.user:' + $scope.settings.username,
+            url: signUpUrl,// + '/org.couchdb.user:' + $scope.settings.username,
             data: {
-                _id: 'org.couchdb.user:' + $scope.settings.username,
-                name: $scope.settings.username,
-                roles: [],
-                type: 'user',
+                username: $scope.settings.username,
                 password: $scope.password,
                 email: $scope.settings.email
             },
@@ -911,9 +908,8 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                 $scope.showSignUp = false;
             },
             success: function(data) {
-                console.log('Create user success:');
                 console.log(data);
-                switch (data) {
+                switch (data.success) {
                     case data.result === false:
                         $timeout(function() {
                             $scope.pleaseWait = false;
