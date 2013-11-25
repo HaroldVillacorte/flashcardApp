@@ -908,17 +908,29 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                 $scope.showSignUp = false;
             },
             success: function(data) {
+                var message = data.message;
+                var messageClass = 'alert';
+
                 if (data.success === false) {
-                    var messageHeader = data.message;
-                    if (data.data.isArray()) {
-                        console.log('errors is an array');
+                    if (data.data instanceof Array) {
+                        for (var i = 0; i < data.data.length; i++) {
+                            message += '<br/>' + data.data[i].msg;
+                        }
                     }
                 }
-                console.log(data);
+                else {
+                    messageClass = 'success';
+                }
+                $timeout(function() {
+                    Message.set(message, messageClass);
+                    $scope.pleaseWait = false;
+                    $scope.showSignUp = true;
+                    console.log(data);
+                }, 2000);
             },
             error: function(error) {
                 $timeout(function() {
-                    Message.set('There was an error signing up 2.  Please try again.', 'alert');
+                    Message.set('There was an error signing up.  Please try again.', 'alert');
                     $scope.pleaseWait = false;
                     $scope.showSignUp = true;
                 }, 2000);
