@@ -897,9 +897,9 @@ var AccountController = flashcardAgent.controller('AccountController', function(
     $scope.signUp = function() {
         $.ajax({
             type: 'PUT',
-            url: signUpUrl,// + '/org.couchdb.user:' + $scope.settings.username,
+            url: 'http://localhost:3000/put/user',
             data: {
-                username: $scope.settings.username,
+                displayName: $scope.settings.username,
                 password: $scope.password,
                 email: $scope.settings.email
             },
@@ -908,53 +908,13 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                 $scope.showSignUp = false;
             },
             success: function(data) {
-                console.log(data);
-                switch (data.success) {
-                    case data.result === false:
-                        $timeout(function() {
-                            $scope.pleaseWait = false;
-                            $scope.showSignUp = true;
-                            Message.set('There was an error signing up 1.  Please try again.', 'alert');
-                        }, 2000);
-                        break;
-                    case 'uniqueUsername':
-                        $timeout(function() {
-                            $scope.pleaseWait = false;
-                            $scope.showSignUp = true;
-                            Message.set('That username is already taken.  Try another one.', 'alert');
-                        }, 2000);
-                        break;
-                    case 'uniqueEmail':
-                        $timeout(function() {
-                            $scope.pleaseWait = false;
-                            $scope.showSignUp = true;
-                            Message.set('That email is already in our database.  Try another one.', 'alert');
-                        }, 2000);
-                        break;
-                    case 'alnum':
-                        $timeout(function() {
-                            $scope.pleaseWait = false;
-                            $scope.showSignUp = true;
-                            Message.set('Username and password values can only be alphanumeric with no spaces.', 'alert');
-                        }, 2000);
-                        break;
-                    case 'validEmail':
-                        $timeout(function() {
-                            $scope.pleaseWait = false;
-                            $scope.showSignUp = true;
-                            Message.set('You must enter a valid email address.', 'alert');
-                        }, 2000);
-                        break;
-                    default:
-                        $scope.settings.apiKey = data.result.apiKey;
-                        $scope.settings.apiExpire = data.result.apiExpire;
-                        dbService.putFcDoc($scope.settings);
-                        $timeout(function() {
-                            $scope.pleaseWait = false;
-                            $scope.showAccount = true;
-                            Message.set('You have successfully signed up.', 'success');
-                        }, 2000);
+                if (data.success === false) {
+                    var messageHeader = data.message;
+                    if (data.data.isArray()) {
+                        console.log('errors is an array');
+                    }
                 }
+                console.log(data);
             },
             error: function(error) {
                 $timeout(function() {
