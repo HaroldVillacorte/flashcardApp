@@ -66,7 +66,6 @@ flashcardAgent.factory('fcString', function() {
         ucFirst: function(string) {
             var first = string.charAt(0).toUpperCase();
             return first + string.substr(1);
-            ;
         }
     };
     return stringFactory;

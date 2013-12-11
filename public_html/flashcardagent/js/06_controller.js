@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------//
 
 flashcardAgent.controller('NavController', function($scope, goToService, $route,
-        $timeout) {
+    $timeout) {
     $scope.showRefresh = true;
     $scope.showPleaseWait = false;
     $scope.mainMenu = [
@@ -50,7 +50,7 @@ flashcardAgent.controller('NavController', function($scope, goToService, $route,
 //----------------------------------------------------------------------------//
 
 var IndexController = flashcardAgent.controller('IndexController', function(
-        $scope, $timeout, $q, dbService) {
+    $scope, $timeout, $q, dbService) {
 
     $scope.showInit = false;
     $scope.showReady = false;
@@ -86,7 +86,7 @@ var IndexController = flashcardAgent.controller('IndexController', function(
 //----------------------------------------------------------------------------//
 
 var DataViewController = flashcardAgent.controller('DataViewController', function(
-        $scope, goToService, deckService, dbService) {
+    $scope, goToService, deckService, dbService) {
 
     deckService.reset();
     dbService.getFcDecks();
@@ -122,7 +122,7 @@ var DataViewController = flashcardAgent.controller('DataViewController', functio
 //----------------------------------------------------------------------------//
 
 var DeckAddController = flashcardAgent.controller('DeckAddController', function(
-        $scope, goToService, deckService, dbService) {
+    $scope, goToService, deckService, dbService) {
 
     $scope.deck = deckService.entity;
 
@@ -142,7 +142,7 @@ var DeckAddController = flashcardAgent.controller('DeckAddController', function(
 //----------------------------------------------------------------------------//
 
 var DeckEditController = flashcardAgent.controller('DeckEditController', function(
-        $scope, $routeParams, goToService, dbService) {
+    $scope, $routeParams, goToService, dbService) {
 
     dbService.getFcDeck($routeParams.deckId);
     $scope.$on('getFcDeck', function(event, response) {
@@ -166,7 +166,7 @@ var DeckEditController = flashcardAgent.controller('DeckEditController', functio
 //----------------------------------------------------------------------------//
 
 var DeckDeleteController = flashcardAgent.controller('DeckDeleteController', function(
-        $scope, $routeParams, goToService, dbService) {
+    $scope, $routeParams, goToService, dbService) {
 
     dbService.getFcDeck($routeParams.deckId);
     $scope.$on('getFcDeck', function(event, response) {
@@ -189,7 +189,7 @@ var DeckDeleteController = flashcardAgent.controller('DeckDeleteController', fun
 //----------------------------------------------------------------------------//
 
 var DeckViewController = flashcardAgent.controller('DeckViewController', function(
-        $scope, $routeParams, goToService, dbService) {
+    $scope, $routeParams, goToService, dbService) {
 
     dbService.getFcDeck($routeParams.deckId);
     $scope.$on('getFcDeck', function(event, response) {
@@ -198,7 +198,7 @@ var DeckViewController = flashcardAgent.controller('DeckViewController', functio
             $scope.cards = $scope.deck.cards;
             $scope.endLimit = $scope.cards.length;
             $scope.startLimit = 1;
-            $scope.endLimit;
+            $scope.endLimit = undefined;
             $scope.reverseBool = false;
             $scope.resultOrder = 'created';
         });
@@ -226,7 +226,7 @@ var DeckViewController = flashcardAgent.controller('DeckViewController', functio
 //----------------------------------------------------------------------------//
 
 var CardAddController = flashcardAgent.controller('CardAddController', function(
-        $scope, goToService, $routeParams, cardService, dbService, guidService) {
+    $scope, goToService, $routeParams, cardService, dbService, guidService) {
 
     // Reflow Foundation sections.
     $(document).foundation('section', 'reflow');
@@ -300,8 +300,8 @@ var CardAddController = flashcardAgent.controller('CardAddController', function(
 //----------------------------------------------------------------------------//
 
 var CardEditController = flashcardAgent.controller('CardEditController', function(
-        $scope, $routeParams, dbService, $timeout, fileService, guidService,
-        goToService) {
+    $scope, $routeParams, dbService, $timeout, fileService, guidService,
+    goToService) {
 
     // Reflow Foundation sections.
     $(document).foundation('section', 'reflow');
@@ -441,7 +441,7 @@ var CardEditController = flashcardAgent.controller('CardEditController', functio
 //----------------------------------------------------------------------------//
 
 var CardDeleteController = flashcardAgent.controller('CardDeleteController', function(
-        $scope, $routeParams, goToService, dbService) {
+    $scope, $routeParams, goToService, dbService) {
 
     var index;
     dbService.getFcDeck($routeParams.deckId);
@@ -478,7 +478,7 @@ var CardDeleteController = flashcardAgent.controller('CardDeleteController', fun
 //----------------------------------------------------------------------------//
 
 var CardController = flashcardAgent.controller('CardController', function(
-        Message, $scope, showCardService, dbService, fileService, $timeout, dbService) {
+    Message, $scope, showCardService, dbService, fileService, $timeout) {
 
     dbService.getFcDecks();
     $scope.$on('getFcDecks', function(event, response) {
@@ -486,14 +486,14 @@ var CardController = flashcardAgent.controller('CardController', function(
             $scope.chosenDeck = 0;
             $scope.chosenCard = 0;
             $scope.cardIndex = 0;
-            $scope.content;
+            $scope.content = undefined;
             $scope.show = showCardService;
-            $scope.stripedCard;
+            $scope.stripedCard = undefined;
 
             // Images.
-            $scope.questionImageAttachment;
-            $scope.answerImageAttachment;
-            $scope.notesImageAttachment;
+            $scope.questionImageAttachment = undefined;
+            $scope.answerImageAttachment = undefined;
+            $scope.notesImageAttachment = undefined;
             $scope.decks = response;
         });
     });
@@ -641,7 +641,7 @@ var CardController = flashcardAgent.controller('CardController', function(
 //----------------------------------------------------------------------------//
 
 var SyncController = flashcardAgent.controller('SyncController', function($scope,
-        dbService, $timeout, goToService) {
+    dbService, $timeout, goToService) {
 
     var pushUrl = 'http://flashcard/rest-push-data';
     var pullUrl = 'http://flashcard/rest-pull-data';
@@ -790,7 +790,7 @@ var SyncController = flashcardAgent.controller('SyncController', function($scope
 //----------------------------------------------------------------------------//
 
 var AccountController = flashcardAgent.controller('AccountController', function(
-        $scope, Message, dbService, $timeout, dbService) {
+    $scope, Message, dbService, $timeout) {
 
     var signUpUrl = 'http://localhost:3000/put/user';
     var loginUrl = 'http://flashcard/rest-user-login';
@@ -798,13 +798,12 @@ var AccountController = flashcardAgent.controller('AccountController', function(
     dbService.getFcSettings();
     $scope.$on('getFcSettings', function(event, response) {
         $scope.$apply(function() {
-            $scope.password;
             $scope.showLogin = true;
             $scope.showAccount = false;
             $scope.showSignUp = false;
             $scope.pleaseWait = false;
             $scope.settings = response;
-            if ($scope.settings.username && $scope.settings.apiExpire * 1000 >= Math.round((new Date()).getTime())) {
+            if ($scope.settings.username && $scope.settings.email && $scope.settings.password) {
                 $scope.showLogin = false;
                 $scope.showAccount = true;
             }
@@ -919,6 +918,7 @@ var AccountController = flashcardAgent.controller('AccountController', function(
                     }
                 }
                 else {
+                    dbService.putFcDoc($scope.settings);
                     messageClass = 'success';
                 }
                 $timeout(function() {
